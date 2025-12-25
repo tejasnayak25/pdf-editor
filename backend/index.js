@@ -17,7 +17,7 @@ let upload = multer({ dest: env === "development" ? "uploads/" : "/tmp/" });
 
 app.use(express.json());
 
-app.post("/upload", upload.single("file"), (req, res) => {
+app.post("/api/upload", upload.single("file"), (req, res) => {
     let name = req.body.name;
     let description = req.body.description;
     let accessList = JSON.parse(req.body.accessList || "[]");

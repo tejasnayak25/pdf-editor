@@ -60,7 +60,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
         res.json({ success: true, id: pdf.insertedId.toString(), message: "File uploaded successfully" });
     } catch (error) {
         console.error("Error creating PDF:", error);
-        res.status(500).json({ success: false, message: "Internal server error" + error });
+        res.status(500).json({ success: false, message: "Internal server error" });
         return;
     }
 });
@@ -103,8 +103,31 @@ app.post("/api/delete-pdf", async (req, res) => {
         res.json({ success: true, message: "PDF deleted successfully" });
     } catch (error) {
         console.error("Error connecting to database:", error);
-        res.status(500).json({ success: false, message: "Internal server error" + error });
+        res.status(500).json({ success: false, message: "Internal server error" });
         return;
+    }
+});
+
+app.post("/api/pdfs/:pdfId", async (req, res) => {
+    let pdfId = req.params.pdfId;
+    let { mode, email } = req.body;
+    try {
+        await database.connect();
+        let pdf = await database.getPdfById(pdfId);
+        if (pdf) {
+            if (mode === 'edit' && pdf.createdBy === email) {
+                res.json({ success: true, pdf });
+            } else if(mode === 'view' && (pdf.createdBy === email || (pdf.accessList && pdf.accessList.includes(email)))) {
+                res.json({ success: true, pdf });
+            } else {
+                res.status(403).json({ success: false, message: "Access denied" });
+            }
+        } else {
+            res.status(404).json({ success: false, message: "PDF not found" });
+        }
+    } catch (error) {
+        console.error("Error fetching PDF:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
 });
 
@@ -121,7 +144,7 @@ app.get("/api/user/:email", async (req, res) => {
         }
     } catch (error) {
         console.error("Error fetching user:", error);
-        res.status(500).json({ success: false, message: "Internal server error" + error });
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
 });
 

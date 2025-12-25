@@ -1,8 +1,8 @@
-// import { useState } from 'react'
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import Login from './login/Login'
 import Home from './home/Home'
+import PdfEdit from './pdf/PdfEdit'
 
 function App() {
 
@@ -11,6 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/pdfs/:pdf/edit" element={<PdfEdit />} />
       </Routes>
     </div>
   )

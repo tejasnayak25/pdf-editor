@@ -75,7 +75,7 @@ export default function Home() {
             pdfDescRef.current.value = "";
             accessRef.current.value = "";
             setSelectedFile(null);
-            window.open("/pdfs/" + data.id + "/edit", "_self");
+            window.location.href = `/pdfs/${data.id}/edit`;
         })
         .catch(err => {
             console.error(err);
@@ -147,7 +147,7 @@ export default function Home() {
                                     <div className="card-actions flex justify-end items-center mt-2">
                                         {
                                             isTeacher && (
-                                                <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2 flex-wrap">
                                                     <a href={`/pdfs/${pdf._id}/submissions`} target="_blank" rel="noreferrer" className="btn btn-primary">View Submissions</a>
                                                     <a href={`/pdfs/${pdf._id}/edit`} className="btn btn-outline">Edit</a>
                                                     <button onClick={() => handleDelete(pdf._id, pdf.file.url)} className="btn btn-square btn-error"><Trash2 className="w-4 h-4" /></button>

@@ -47,7 +47,7 @@ export default function Home() {
         formdata.append("description", description);
         formdata.append("file", selectedFile);
         formdata.append("accessList", JSON.stringify(accessList));
-        fetch("http://localhost:3000/upload", {
+        fetch("http://localhost:3000/api/upload", {
             method: "POST",
             body: formdata
         })

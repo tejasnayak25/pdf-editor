@@ -74,7 +74,7 @@ export default function PdfEdit() {
 
     balloonsRef.current[pageNumber] = balloonEditor(balloonRef.current, canvasContainer, pageNumber, pagesRef.current);
 
-    balloonsRef.current[pageNumber].init(pageNumber, (user?.role === "teacher") ? "edit" : "view", config[pageNumber]);
+    balloonsRef.current[pageNumber].init(pageNumber, (user?.role === "teacher") ? "edit" : "view", config ? config[pageNumber] : null);
   }
 
   useEffect(() => {

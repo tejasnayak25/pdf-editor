@@ -71,6 +71,10 @@ app.get("/api/user/:email", async (req, res) => {
     }
 });
 
+app.get("/api/health", (req, res) => {
+    res.json({ status: "ok" });
+});
+
 app.listen(3000, () => {
     console.log("Server is running on http://localhost:3000");
 });

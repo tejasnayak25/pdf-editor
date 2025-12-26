@@ -70,7 +70,7 @@ app.get("/api/user/:email", async (req, res) => {
         
         let userPdfs = await database.getUserPdfs(email);
         if (userPdfs) {
-            res.json({ success: true, user: { email, forms: userPdfs } });
+            res.json({ success: true, user: { email, pdfs: userPdfs } });
         } else {
             res.json({ success: false, message: "User not found" });
         }

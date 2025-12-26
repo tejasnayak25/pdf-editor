@@ -7,7 +7,6 @@ class Database {
         this.userCollection = null;
         this.pdfCollection = null;
         this.connectPromise = null;
-        this.protocol = "https://";
     }
 
     async connect() {

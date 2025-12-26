@@ -2,6 +2,7 @@ const { put, del } = require("@vercel/blob");
 
 class Storage {
     constructor() {
+        this.protocol = "https://";
     }
 
     async uploadFile(name, file) {

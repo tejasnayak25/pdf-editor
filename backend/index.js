@@ -74,6 +74,11 @@ app.post("/api/delete-pdf", async (req, res) => {
     }
 
     try {
+        if(env === "development" && path.startsWith(storage.protocol)) {
+            res.status(400).json({ success: false, message: "This pdf cannot be deleted in development mode" });
+            return;
+        }
+        
         await database.connect();
 
         let pdf = await database.getPdfById(id);
@@ -90,11 +95,7 @@ app.post("/api/delete-pdf", async (req, res) => {
         await database.deletePdf(id);
 
         if(env === "development") {
-            if(path.startsWith(database.protocol)) {
-                await storage.deleteFile(path);
-            } else {
-                fs.unlinkSync(path);
-            }
+            fs.unlinkSync(path);
         } else {
             await storage.deleteFile(path);
         }

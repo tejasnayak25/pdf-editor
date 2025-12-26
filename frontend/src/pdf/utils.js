@@ -37,7 +37,7 @@ class BalloonEditor {
 
         this.elements = this.pages[pageNumber].elements;
 
-        if(this.elements && Object.keys(this.elements).length === 0 && Object.keys(config.elements).length > 0) {
+        if(this.elements && Object.keys(this.elements).length === 0 && config && Object.keys(config.elements).length > 0) {
             Object.entries(config.elements).forEach(([id, elementData]) => {
                 let mark = document.createElement('div');
                 mark.className = 'pdf-mark border-2 border-slate-500 bg-slate-300/50 rounded-md absolute';

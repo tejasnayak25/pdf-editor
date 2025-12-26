@@ -15,22 +15,6 @@ export default function Home() {
     const uploadRef = useRef();
     const accessRef = useRef();
 
-    function refreshPdfs() {
-        fetch(`/api/user/${user.email}`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    console.log("User data fetched:", data.user);
-                    setPdfs(data.user.pdfs || []);
-                } else {
-                    setPdfs([]);
-                }
-            })
-            .catch(err => {
-                console.error("Error fetching user data:", err);
-            });
-    }
-
     useEffect(() => {
         if (!user) {
             window.location.href = "/login";
@@ -86,14 +70,12 @@ export default function Home() {
         })
         .then(res => res.json())
         .then(data => {
-            console.log(data);
-            alert("PDF uploaded successfully");
             setCardOpen(false);
             pdfNameRef.current.value = "";
             pdfDescRef.current.value = "";
             accessRef.current.value = "";
             setSelectedFile(null);
-            refreshPdfs();
+            window.open("/pdfs/" + data.id + "/edit", "_self");
         })
         .catch(err => {
             console.error(err);
@@ -162,14 +144,21 @@ export default function Home() {
                                     <a href={`/pdfs/${pdf._id}/view`} target="_blank" rel="noreferrer" className="card-title flex items-center gap-2 hover:underline">{pdf.name} <Link className="w-4 h-4" /></a>
                                     <p className="text-slate-700">{pdf.description || "No description provided."}</p>
                                     <p className="text-slate-700 text-sm">{pdf.createdAt ? new Date(pdf.createdAt).toLocaleString() : ""}</p>
-                                    <div className="card-actions flex justify-end gap-2 items-center mt-2">
-                                        <a href={`/pdfs/${pdf._id}/submissions`} target="_blank" rel="noreferrer" className="btn btn-primary">View Submissions</a>
-                                        { isTeacher && (
-                                            <a href={`/pdfs/${pdf._id}/edit`} className="btn btn-outline">Edit</a>
-                                        ) }
-                                        { isTeacher && (
-                                            <button onClick={() => handleDelete(pdf._id, pdf.file.url)} className="btn btn-square btn-error"><Trash2 className="w-4 h-4" /></button>
-                                        ) }
+                                    <div className="card-actions flex justify-end items-center mt-2">
+                                        {
+                                            isTeacher && (
+                                                <div className="flex items-center gap-2">
+                                                    <a href={`/pdfs/${pdf._id}/submissions`} target="_blank" rel="noreferrer" className="btn btn-primary">View Submissions</a>
+                                                    <a href={`/pdfs/${pdf._id}/edit`} className="btn btn-outline">Edit</a>
+                                                    <button onClick={() => handleDelete(pdf._id, pdf.file.url)} className="btn btn-square btn-error"><Trash2 className="w-4 h-4" /></button>
+                                                </div>
+                                            )
+                                        }
+                                        {
+                                            !isTeacher && (
+                                                <a href={`/pdfs/${pdf._id}/view`} target="_blank" rel="noreferrer" className="btn btn-primary">View PDF</a>
+                                            )
+                                        }
                                     </div>
                                 </div>
                             </div>

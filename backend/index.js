@@ -44,7 +44,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
         
         await database.connect();
 
-        await database.createPdf({
+        let pdf = await database.createPdf({
             name,
             description,
             accessList,
@@ -57,7 +57,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
             updatedAt: new Date()
         });
 
-        res.json({ success: true, message: "File uploaded successfully" });
+        res.json({ success: true, id: pdf.insertedId.toString(), message: "File uploaded successfully" });
     } catch (error) {
         console.error("Error creating PDF:", error);
         res.status(500).json({ success: false, message: "Internal server error" + error });

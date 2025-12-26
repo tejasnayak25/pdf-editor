@@ -240,7 +240,7 @@ class TextInput {
         let input = document.createElement('input');
         input.type = 'text';
         input.className = 'border border-slate-300 rounded px-2 py-1';
-        input.placeholder = 'Enter text';
+        input.placeholder = this.placeholder;
         input.style.width = this.mark.style.width;
         input.style.height = this.mark.style.height;
         input.style.fontSize = `${this.fontSize}px`;
@@ -279,20 +279,18 @@ class RadioInput {
         page.elements = page.elements || {};
         page.elements[this.id] = this;
         mark.setAttribute('data-id', this.id);
+
+        this.options = [ "Option 1", "Option 2", "Option 3" ];
     }
 
     prepareData() {
         if(this.mode === 'edit') {
-            let options = [];
-            this.element.querySelectorAll('span').forEach(span => {
-                options.push(span.innerText);
-            });
             return {
                 type: this.type,
                 fontSize: this.fontSize,
                 layout: this.layout,
                 rect: this.rect,
-                options: options
+                options: this.options
             }
         }
     }
@@ -303,7 +301,7 @@ class RadioInput {
         container.className = this.layout === 'horizontal' ? 'flex items-center gap-2 flex-wrap' : 'flex flex-col';
         container.style.fontSize = `${this.fontSize}px`;
 
-        for(let i = 0; i < 3; i++) {
+        for(let i = 0; i < this.options.length; i++) {
             let div = document.createElement('div');
             div.className = 'flex items-center gap-2';
 
@@ -314,11 +312,14 @@ class RadioInput {
             radio.className = 'radio radio-primary';
             radio.name = `radio-group-${Date.now()}`;
             let span = document.createElement('span');
-            span.innerText = `Option ${i + 1}`;
+            span.innerText = this.options[i];
 
             if(this.mode === 'edit') {
                 span.contentEditable = true;
                 span.classList.add('border', 'border-slate-300', 'rounded', 'px-1');
+                span.oninput = (e) => {
+                    this.options[i] = e.target.innerText;
+                }
             }
 
             label.appendChild(radio);
@@ -371,8 +372,13 @@ class RadioInput {
         if(this.mode === 'edit') {
             span.contentEditable = true;
             span.classList.add('border', 'border-slate-300', 'rounded', 'px-1');
+            span.oninput = (e) => {
+                this.options.push(e.target.innerText);
+            }
         }
         label.appendChild(radio);
+
+        this.options.push(`Option ${num}`);
         
         if(this.mode === 'edit') {
             div.appendChild(label);
@@ -398,23 +404,19 @@ class CheckboxInput {
         this.rect = { width: this.rect.width, height: this.rect.height, left: this.rect.left - containerRect.left, top: this.rect.top - containerRect.top };
         page.elements = page.elements || {};
         page.elements[this.id] = this;
+        this.options = [ "Option 1", "Option 2", "Option 3" ];
         
         mark.setAttribute('data-id', this.id);
     }
 
     prepareData() {
         if(this.mode === 'edit') {
-            let options = [];
-            this.element.querySelectorAll('span').forEach(span => {
-                options.push(span.innerText);
-            });
-
             return {
                 type: this.type,
                 fontSize: this.fontSize,
                 layout: this.layout,
                 rect: this.rect,
-                options: options
+                options: this.options
             }
         }
     }
@@ -424,7 +426,7 @@ class CheckboxInput {
         let container = document.createElement('div');
         container.className = this.layout === 'horizontal' ? 'flex items-center gap-2 flex-wrap' : 'flex flex-col';
         container.style.fontSize = `${this.fontSize}px`;
-        for(let i = 0; i < 3; i++) {
+        for(let i = 0; i < this.options.length; i++) {
             let div = document.createElement('div');
             div.className = 'flex items-center gap-2';
             let label = document.createElement('label');
@@ -433,10 +435,13 @@ class CheckboxInput {
             checkbox.type = 'checkbox';
             checkbox.className = 'checkbox checkbox-primary';
             let span = document.createElement('span');
-            span.innerText = `Option ${i + 1}`;
+            span.innerText = this.options[i];
             if(this.mode === 'edit') {
                 span.contentEditable = true;
                 span.classList.add('border', 'border-slate-300', 'rounded', 'px-1');
+                span.oninput = (e) => {
+                    this.options[i] = e.target.innerText;
+                }
             }
             label.appendChild(checkbox);
             
@@ -478,8 +483,13 @@ class CheckboxInput {
         if(this.mode === 'edit') {
             span.contentEditable = true;
             span.classList.add('border', 'border-slate-300', 'rounded', 'px-1');
+            span.oninput = (e) => {
+                this.options.push(e.target.innerText);
+            }
         }
         label.appendChild(checkbox);
+
+        this.options.push(`Option ${num}`);
         
         if(this.mode === 'edit') {
             div.appendChild(label);

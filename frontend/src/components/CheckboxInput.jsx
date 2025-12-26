@@ -1,5 +1,5 @@
-export default function RadioInput({ key, type, fontSize, layout, rect, options, selectedValue, onChange }) {
-    let radio_name = `radio-group-${key}`;
+export default function CheckboxInput({ key, type, fontSize, layout, rect, options, isChecked, onChange }) {
+    let checkbox_name = `checkbox-group-${key}`;
     return (
         <div
             className="absolute border border-slate-300 rounded px-2 py-1 bg-white"
@@ -15,10 +15,10 @@ export default function RadioInput({ key, type, fontSize, layout, rect, options,
                     <label key={index} className="flex items-center gap-2">
                         <input
                             type={type}
-                            name={radio_name}
-                            className="radio radio-primary"
+                            name={checkbox_name}
+                            className="checkbox checkbox-primary"
                             value={option}
-                            defaultChecked={selectedValue === option}
+                            defaultChecked={isChecked.includes(option)}
                             onChange={onChange} />
                         <span style={{ fontSize: fontSize + 'px' }}>{option}</span>
                     </label>

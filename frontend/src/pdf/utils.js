@@ -218,6 +218,7 @@ class TextInput {
         this.rect = { width: this.rect.width, height: this.rect.height, left: this.rect.left - containerRect.left, top: this.rect.top - containerRect.top };
         page.elements = page.elements || {};
         page.elements[this.id] = this;
+        this.placeholder = "Enter text";
 
         mark.setAttribute('data-id', this.id);
     }
@@ -228,7 +229,7 @@ class TextInput {
                 type: this.type,
                 fontSize: this.fontSize,
                 rect: this.rect,
-                placeholder: this.element.placeholder
+                placeholder: this.placeholder
             }
         }
     }
@@ -249,6 +250,7 @@ class TextInput {
         input.onchange = (e) => {
             if(this.mode === 'edit') {
                 input.placeholder = e.target.value;
+                this.placeholder = e.target.value;
                 input.value = '';
             }
         }

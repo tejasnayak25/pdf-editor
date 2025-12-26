@@ -1,4 +1,6 @@
-export default function RadioInput({ id, type, fontSize, layout, rect, options, selectedValue, onChange }) {
+import { memo } from 'react';
+
+function RadioInput({ id, page, type, fontSize, layout, rect, options, selectedValue, onValueChange, readonly }) {
     let radio_name = `radio-group-${id}`;
     return (
         <div
@@ -13,13 +15,23 @@ export default function RadioInput({ id, type, fontSize, layout, rect, options, 
             <div className={`flex ${layout === 'horizontal' ? 'flex-row' : 'flex-col'} gap-2`}>
                 {options.map((option, index) => (
                     <label key={index} className="flex items-center gap-2">
-                        <input
-                            type={type}
-                            name={radio_name}
-                            className="radio radio-primary"
-                            value={option}
-                            defaultChecked={selectedValue === option}
-                            onChange={onChange} />
+                        {readonly ? (
+                            <input
+                                type={type}
+                                name={radio_name}
+                                className="radio radio-primary"
+                                value={option}
+                                checked={selectedValue === option}
+                                onChange={() => onValueChange(page, id, option)} />
+                        ) : (
+                            <input
+                                type={type}
+                                name={radio_name}
+                                className="radio radio-primary"
+                                value={option}
+                                defaultChecked={selectedValue === option}
+                                onChange={() => onValueChange(page, id, option)} />
+                        )}
                         <span style={{ fontSize: fontSize + 'px' }}>{option}</span>
                     </label>
                 ))}
@@ -27,3 +39,5 @@ export default function RadioInput({ id, type, fontSize, layout, rect, options, 
         </div>
     )
 }
+
+export default memo(RadioInput);

@@ -1,3 +1,5 @@
+import { PDFDocument, rgb } from "pdf-lib";
+
 export const getPdf = (pdfId, mode, email) => {
     return new Promise((resolve, reject) => {
         fetch(`/api/pdfs/${pdfId}`, {
@@ -53,10 +55,13 @@ class BalloonEditor {
                 let el;
                 if(elementData.type === 'text') {
                     el = new TextInput(mark, elementData.fontSize, this.page, this.containerRect, mode, id);
+                    el.placeholder = elementData.placeholder || "Enter text";
                 } else if(elementData.type === 'radio') {
                     el = new RadioInput(mark, elementData.fontSize, elementData.layout, this.page, this.containerRect, mode, id);
+                    el.options = elementData.options || [ "Option 1", "Option 2", "Option 3" ];
                 } else if(elementData.type === 'checkbox') {
                     el = new CheckboxInput(mark, elementData.fontSize, elementData.layout, this.page, this.containerRect, mode, id);
+                    el.options = elementData.options || [ "Option 1", "Option 2", "Option 3" ];
                 }
                 this.elements[id] = el;
             });
@@ -138,6 +143,14 @@ class BalloonEditor {
             delete this.elements[t.id];
 
             this.hide();
+        }
+
+        this.balloon.querySelector('#vertical-layout-btn').onclick = () => {
+            t.changeLayout('vertical');
+        }
+
+        this.balloon.querySelector('#horizontal-layout-btn').onclick = () => {
+            t.changeLayout('horizontal');
         }
 
         this.balloon.querySelector('#type-selector').onchange = (e) => {
@@ -510,4 +523,90 @@ class CheckboxInput {
         this.layout = layout;
         this.element.className = layout === 'horizontal' ? 'flex items-center gap-2 flex-wrap' : 'flex flex-col';   
     }
+}
+
+export function exportToPdf(url, pages, callback) {
+    fetch(url)
+    .then(res => res.arrayBuffer())
+    .then(async (data) => {
+        const pdfDoc = await PDFDocument.load(data);
+
+        for(let pageNum in pages) {
+            let page = pdfDoc.getPage(parseInt(pageNum) - 1);
+            let elements = pages[pageNum].elements;
+
+            for(let id in elements) {
+                let el = elements[id];
+                if(el.type === 'text') {
+                    page.drawText(el.value || '', {
+                        x: el.rect.left,
+                        y: page.getHeight() - el.rect.top - el.rect.height + (el.rect.height - el.fontSize) / 2,
+                        size: el.fontSize,
+                    });
+                } else if(el.type === 'radio') {
+                    let optionHeight = el.fontSize + 10;
+                    el.options.forEach((option, index) => {
+                        let x = el.rect.left;
+                        let y = page.getHeight() - el.rect.top - (index * (el.layout === 'horizontal' ? 0 : optionHeight)) - (el.layout === 'horizontal' ? 0 : optionHeight) + 4;
+                        if(el.layout === 'horizontal') {
+                            x += index * (el.fontSize + 20);
+                        }
+                        page.drawCircle({
+                            x: x + el.fontSize / 2 - 2,
+                            y: y - 4 + el.fontSize / 2,
+                            size: el.fontSize / 2,
+                            borderColor: rgb(96/255, 93/255, 255/255),
+                            borderWidth: 1,
+                            color: el.value === option ? rgb(0, 0, 0) : rgb(1, 1, 1),
+                        });
+                        page.drawCircle({
+                            x: x + el.fontSize / 2 - 2,
+                            y: y - 4 + el.fontSize / 2,
+                            size: el.fontSize / 2 - 3.5,
+                            color: el.value === option ? rgb(96/255, 93/255, 255/255) : rgb(1, 1, 1),
+                        });
+                        page.drawText(`${option}`, {
+                            x: x + el.fontSize + 4,
+                            y: y - 2,
+                            size: el.fontSize,
+                        });
+                    });
+                } else if(el.type === 'checkbox') {
+                    let optionHeight = el.fontSize + 10;
+                    el.options.forEach((option, index) => {
+                        let x = el.rect.left;
+                        let y = page.getHeight() - el.rect.top - (index * (el.layout === 'horizontal' ? 0 : optionHeight)) - (el.layout === 'horizontal' ? 0 : optionHeight) + 4;
+                        if(el.layout === 'horizontal') {
+                            x += index * (el.fontSize + 20);
+                        }
+                        page.drawRectangle({
+                            x: x - 2,
+                            y: y - 4,
+                            width: el.fontSize,
+                            height: el.fontSize,
+                            borderColor: rgb(96/255, 93/255, 255/255),
+                            borderWidth: 1,
+                            color: el.value && el.value.includes(option) ? rgb(0, 0, 0) : rgb(1, 1, 1),
+                        });
+                        if(el.value && el.value.includes(option)) {
+                            page.drawRectangle({
+                                x: x + 2,
+                                y: y,
+                                width: el.fontSize - 8,
+                                height: el.fontSize - 8,
+                                color: rgb(96/255, 93/255, 255/255),
+                            });
+                        }
+                        page.drawText(`${option}`, {
+                            x: x + el.fontSize + 4,
+                            y: y - 2,
+                            size: el.fontSize,
+                        });
+                    });
+                }
+            }
+        }
+
+        callback(await pdfDoc.save());
+    });
 }

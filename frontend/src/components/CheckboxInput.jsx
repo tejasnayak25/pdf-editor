@@ -1,4 +1,6 @@
-export default function CheckboxInput({ id, type, fontSize, layout, rect, options, isChecked, onChange }) {
+import { memo } from 'react';
+
+function CheckboxInput({ id, page, type, fontSize, layout, rect, options, isChecked, onValueChange, readonly }) {
     let checkbox_name = `checkbox-group-${id}`;
     return (
         <div
@@ -13,13 +15,26 @@ export default function CheckboxInput({ id, type, fontSize, layout, rect, option
             <div className={`flex ${layout === 'horizontal' ? 'flex-row' : 'flex-col'} gap-2`}>
                 {options.map((option, index) => (
                     <label key={index} className="flex items-center gap-2">
+                        {readonly ? (<input
+                            type={type}
+                            name={checkbox_name}
+                            className="checkbox checkbox-primary"
+                            value={option}
+                            checked={isChecked.includes(option)} />
+                        ) : (
                         <input
                             type={type}
                             name={checkbox_name}
                             className="checkbox checkbox-primary"
                             value={option}
                             defaultChecked={isChecked.includes(option)}
-                            onChange={onChange} />
+                            onChange={(e) => {
+                                const next = e.target.checked
+                                    ? [...isChecked, option]
+                                    : isChecked.filter(opt => opt !== option);
+                                onValueChange(page, id, next);
+                            }} />
+                        )}
                         <span style={{ fontSize: fontSize + 'px' }}>{option}</span>
                     </label>
                 ))}
@@ -27,3 +42,5 @@ export default function CheckboxInput({ id, type, fontSize, layout, rect, option
         </div>
     )
 }
+
+export default memo(CheckboxInput);

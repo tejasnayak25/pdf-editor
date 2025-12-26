@@ -40,8 +40,8 @@ export default function PdfEdit() {
         if(pdf.config) {
             fetch(pdf.config.url)
                 .then(res => res.json())
-                .then(data => {
-                    setConfig(data);
+                .then(data => {                  
+                  setConfig(data);
                 })
                 .catch(err => {
                     console.error("Error fetching PDF config:", err);

@@ -184,6 +184,155 @@ app.post("/api/save-pdf-config", async (req, res) => {
     }
 });
 
+app.post("/api/pdfs/:pdfId/save-draft", async (req, res) => {
+    let pdfId = req.params.pdfId;
+    let { userEmail, values } = req.body;
+    try {
+        await database.connect();
+        let pdf = await database.getPdfById(pdfId);
+        if (!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+        if (!(pdf.accessList && pdf.accessList.includes(userEmail))) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+        let result = await database.savePdfDraft(pdfId, userEmail, values);
+        res.json({ success: true, id: result.insertedId, message: "Draft saved successfully" });
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+        return;
+    }
+});
+
+app.post("/api/pdfs/:pdfId/save-submission", async (req, res) => {
+    let pdfId = req.params.pdfId;
+    let { userEmail, values } = req.body;
+
+    try {
+        await database.connect();
+        let pdf = await database.getPdfById(pdfId);
+        if (!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+
+        if (!(pdf.accessList && pdf.accessList.includes(userEmail))) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+        let result = await database.savePdfSubmission(pdfId, userEmail, values);
+        res.json({ success: true, id: result.insertedId, message: "Submission saved successfully" });
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+        return;
+    }
+});
+
+app.post("/api/pdfs/:pdfId/get-submissions", async (req, res) => {
+    let pdfId = req.params.pdfId;
+    let { creator } = req.body;
+    try {
+        await database.connect();
+        let pdf = await database.getPdfById(pdfId);
+        if (!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+        if (pdf.createdBy !== creator) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+        let submissions = await database.getPdfSubmissions(pdfId);
+        res.json({ success: true, submissions });
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+        return;
+    }
+});
+
+app.post("/api/pdfs/:pdfId/get-user-drafts-submissions", async (req, res) => {
+    let pdfId = req.params.pdfId;
+    let { userEmail } = req.body;
+    try {
+        await database.connect();
+        let pdf = await database.getPdfById(pdfId);
+        if (!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+        if (!(pdf.accessList && pdf.accessList.includes(userEmail))) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+        let drafts = await database.getPdfUserDrafts(pdfId, userEmail);
+        let submissions = await database.getPdfUserSubmissions(pdfId, userEmail);
+        res.json({ success: true, drafts, submissions });
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+        return;
+    }
+});
+
+app.post("/api/pdfs/:pdfId/get-version", async (req, res) => {
+    let pdfId = req.params.pdfId;
+    let { userEmail, versionId } = req.body;
+    try {
+        await database.connect();
+        
+        let pdf = await database.getPdfById(pdfId);
+        if (!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+        if(!(pdf.accessList && pdf.accessList.includes(userEmail))) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+        let version = await database.getPdfVersionById(versionId, userEmail);
+        if(!version) {
+            res.status(404).json({ success: false, message: "Version not found" });
+            return;
+        }
+        res.json({ success: true, version });
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+app.post("/api/pdfs/:pdfId/get-submission", async (req, res) => {
+    let pdfId = req.params.pdfId;
+    let { userEmail, submissionId } = req.body;
+    try {
+        await database.connect();
+        
+        let pdf = await database.getPdfById(pdfId);
+        if (!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+        if(!(pdf.createdBy === userEmail)) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+        let submission = await database.getPdfSubmissionById(submissionId);
+        if(!submission) {
+            res.status(404).json({ success: false, message: "Submission not found" });
+            return;
+        }
+        res.json({ success: true, submission: submission });
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
 app.get("/api/user/:email", async (req, res) => {
     let email = req.params.email;
     try {

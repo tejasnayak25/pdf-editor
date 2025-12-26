@@ -6,6 +6,8 @@ class Database {
         this.db = null;
         this.userCollection = null;
         this.pdfCollection = null;
+        this.draftsCollection = null;
+        this.submissionsCollection = null;
         this.connectPromise = null;
     }
 
@@ -32,6 +34,8 @@ class Database {
                 this.db = client.db("pdf-editor");
                 this.userCollection = this.db.collection("users");
                 this.pdfCollection = this.db.collection("pdfs");
+                this.draftsCollection = this.db.collection("drafts");
+                this.submissionsCollection = this.db.collection("submissions");
                 console.log("Connected to MongoDB");
             })
             .catch(error => {
@@ -78,6 +82,50 @@ class Database {
             { _id: objectId },
             { $set: { config: config } }
         );
+    }
+
+    savePdfDraft(pdfId, userEmail, values) {
+        return this.draftsCollection.insertOne({
+            pdfId: pdfId,
+            values: values,
+            createdAt: new Date(),
+            createdBy: userEmail
+        });
+    }
+
+    savePdfSubmission(pdfId, userEmail, values) {
+        return this.submissionsCollection.insertOne({
+            pdfId: pdfId,
+            values: values,
+            createdAt: new Date(),
+            createdBy: userEmail
+        });
+    }
+
+    getPdfSubmissions(pdfId) {
+        return this.submissionsCollection.find({ pdfId: pdfId }).toArray();
+    }
+
+    getPdfUserDrafts(pdfId, userEmail) {
+        return this.draftsCollection.find({ pdfId: pdfId, createdBy: userEmail }).toArray();
+    }
+    
+    getPdfUserSubmissions(pdfId, userEmail) {
+        return this.submissionsCollection.find({ pdfId: pdfId, createdBy: userEmail }).toArray();
+    }
+
+    getPdfVersionById(versionId, userEmail) {
+        let objectId = new ObjectId(versionId);
+        return this.draftsCollection.findOne({ _id: objectId, createdBy: userEmail })
+            .then(draft => {
+                if (draft) return draft;
+                return this.submissionsCollection.findOne({ _id: objectId, createdBy: userEmail });
+            });
+    }
+
+    getPdfSubmissionById(submissionId) {
+        let objectId = new ObjectId(submissionId);
+        return this.submissionsCollection.findOne({ _id: objectId });
     }
 }
 

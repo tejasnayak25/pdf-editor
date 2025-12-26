@@ -4,6 +4,8 @@ import Login from './login/Login'
 import Home from './home/Home'
 import PdfEdit from './pdf/PdfEdit'
 import PdfView from './pdf/PdfView'
+import PdfSubmissions from './pdf/PdfSubmissions'
+import PdfSubmissionView from './pdf/PdfSubmissionView'
 
 function App() {
 
@@ -14,6 +16,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/pdfs/:pdf/edit" element={<PdfEdit />} />
         <Route path="/pdfs/:pdf/view" element={<PdfView />} />
+        <Route path="/pdfs/:pdf/submissions" element={<PdfSubmissions />} />
+        <Route path="/pdfs/:pdf/submissions/:id" element={<PdfSubmissionView />} />
       </Routes>
     </div>
   )

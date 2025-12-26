@@ -49,7 +49,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         console.error("Error creating PDF:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(500).json({ success: false, message: "Internal server error" + error });
         return;
     }
 
@@ -67,7 +67,7 @@ app.get("/api/user/:email", async (req, res) => {
         }
     } catch (error) {
         console.error("Error fetching user:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(500).json({ success: false, message: "Internal server error" + error });
     }
 });
 

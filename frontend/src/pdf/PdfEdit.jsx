@@ -185,7 +185,12 @@ export default function PdfEdit() {
       };
       for(const pageNum in pagesRef.current) {
         const page = pagesRef.current[pageNum];
-        if(!page) continue;
+        if(!page) {
+          if(config && config[pageNum]) {
+            pdfData.pages[pageNum] = config[pageNum];
+          }
+          continue;
+        };
         const balloons = balloonsRef.current[pageNum];
         if(!balloons) continue;
         let pageData = balloons.prepareData(pageNum);

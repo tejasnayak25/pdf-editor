@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronUp, ChevronDown, Save } from "lucide-react";
 import { options } from "./pdf-viewer-utils";
 import TextInput from "../components/TextInput";
 import RadioInput from "../components/RadioInput";
+import CheckboxInput from "../components/CheckboxInput";
 
 export default function PdfView() {
     const { pdf: pdfId } = useParams();
@@ -92,11 +93,23 @@ export default function PdfView() {
                             {config && config[pageNumber] && Object.entries(config[pageNumber].elements).map(([id, element]) => {
                                 if(element.type === "text") {
                                     return (
-                                        <TextInput key={id} type="text" fontSize={element.fontSize} rect={element.rect} placeholder={element.placeholder} value={element.value || ""} onChange={(e) => changeHandler(id, e.target.value)} />
+                                        <TextInput key={id} id={id} type="text" fontSize={element.fontSize} rect={element.rect} placeholder={element.placeholder} value={element.value || ""} onChange={(e) => changeHandler(id, e.target.value)} />
                                     );
                                 } else if(element.type === "radio") {
                                     return (
-                                        <RadioInput key={id} type="radio" fontSize={element.fontSize} layout={element.layout} rect={element.rect} options={element.options} selectedValue={element.value} onChange={(e) => changeHandler(id, e.target.value)} />
+                                        <RadioInput key={id} id={id} type="radio" fontSize={element.fontSize} layout={element.layout} rect={element.rect} options={element.options} selectedValue={element.value} onChange={(e) => changeHandler(id, e.target.value)} />
+                                    );
+                                } else if(element.type === "checkbox") {
+                                    return (
+                                        <CheckboxInput key={id} id={id} type="checkbox" fontSize={element.fontSize} layout={element.layout} rect={element.rect} options={element.options} isChecked={element.value || []} onChange={(e) => {
+                                            let checkedOptions = config[pageNumber].elements[id].value || [];
+                                            if(e.target.checked) {
+                                                checkedOptions.push(e.target.value);
+                                            } else {
+                                                checkedOptions = checkedOptions.filter(opt => opt !== e.target.value);
+                                            }
+                                            changeHandler(id, checkedOptions);
+                                        }} />
                                     );
                                 }
                             })}

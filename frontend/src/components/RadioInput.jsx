@@ -1,5 +1,5 @@
-export default function RadioInput({ key, type, fontSize, layout, rect, options, selectedValue, onChange }) {
-    let radio_name = `radio-group-${key}`;
+export default function RadioInput({ id, type, fontSize, layout, rect, options, selectedValue, onChange }) {
+    let radio_name = `radio-group-${id}`;
     return (
         <div
             className="absolute border border-slate-300 rounded px-2 py-1 bg-white"

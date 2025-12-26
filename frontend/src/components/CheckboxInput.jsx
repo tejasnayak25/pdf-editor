@@ -1,5 +1,5 @@
-export default function CheckboxInput({ key, type, fontSize, layout, rect, options, isChecked, onChange }) {
-    let checkbox_name = `checkbox-group-${key}`;
+export default function CheckboxInput({ id, type, fontSize, layout, rect, options, isChecked, onChange }) {
+    let checkbox_name = `checkbox-group-${id}`;
     return (
         <div
             className="absolute border border-slate-300 rounded px-2 py-1 bg-white"

@@ -8,6 +8,7 @@ export default function Home() {
     });
     const [ cardOpen, setCardOpen ] = useState(false);
     const [ selectedFile, setSelectedFile ] = useState(null);
+    const [ pdfs, setPdfs ] = useState([]);
 
     const pdfNameRef = useRef();
     const pdfDescRef = useRef();
@@ -18,6 +19,20 @@ export default function Home() {
         if (!user) {
             window.location.href = "/login";
             return;
+        } else {
+            fetch(`/api/user/${user.email}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        console.log("User data fetched:", data.user);
+                        setPdfs(data.user.pdfs || []);
+                    } else {
+                        setPdfs([]);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching user data:", err);
+                });
         }
     }, [user]);
 
@@ -47,6 +62,8 @@ export default function Home() {
         formdata.append("description", description);
         formdata.append("file", selectedFile);
         formdata.append("accessList", JSON.stringify(accessList));
+        formdata.append("createdBy", user.email);
+
         fetch("/api/upload", {
             method: "POST",
             body: formdata
@@ -67,6 +84,9 @@ export default function Home() {
         });
     }
     
+    const isTeacher = user?.role === "teacher";
+    const hasPdfs = pdfs.length > 0;
+
     return (
         <div className="size-full min-w-full min-h-dvh p-10 text-slate-900 flex flex-col gap-5">
             <header className="flex gap-5 justify-between items-center">
@@ -78,16 +98,28 @@ export default function Home() {
             </header>
             <main className="mt-5 w-full flex-1">
                 <p className="mt-5 text-lg">Your PDFs</p>
-                <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-1 gap-5">
-                    { user && user.role === "teacher" && (
-                        <div onClick={() => setCardOpen(true)} className="card m-4 bg-white text-slate-900 border-2 border-dashed border-slate-500 shadow-xl hover:shadow-2xl cursor-pointer">
-                            <div className="card-body flex justify-center items-center flex-col gap-4">
-                                <Upload className="h-12 w-12 mx-auto text-slate-500" />
-                                <h2 className="card-title">Upload PDF</h2>
+
+                { !hasPdfs && !isTeacher && (<p className="m-4 text-slate-700 italic">No PDFs found.</p> )}
+                { (hasPdfs || isTeacher) && (
+                    <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-1 gap-5">
+                        { isTeacher && (
+                            <div onClick={() => setCardOpen(true)} className="card m-4 bg-white text-slate-900 border-2 border-dashed border-slate-500 shadow-xl hover:shadow-2xl cursor-pointer">
+                                <div className="card-body flex justify-center items-center flex-col gap-4">
+                                    <Upload className="h-12 w-12 mx-auto text-slate-500" />
+                                    <h2 className="card-title">Upload PDF</h2>
+                                </div>
                             </div>
-                        </div>
-                    ) }
-                </div>
+                        ) }
+                        { pdfs.map((pdf, index) => (
+                            <div key={index} className="card m-4 bg-white text-slate-900 shadow-xl hover:shadow-2xl">
+                                <div className="card-body">
+                                    <h2 className="card-title">{pdf.name}</h2>
+                                    <p className="text-slate-700">{pdf.description || "No description provided."}</p>
+                                </div>
+                            </div>
+                        )) }
+                    </div>
+                ) }
             </main>
 
             <div className={`fixed top-0 left-0 w-full h-full bg-black/50 flex justify-center items-center transition-opacity ${cardOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>

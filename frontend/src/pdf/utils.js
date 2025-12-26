@@ -131,6 +131,11 @@ class BalloonEditor {
             } else if(t.type === 'radio' || t.type === 'checkbox') {
                 this.balloon.querySelectorAll('.layout-btns').forEach(btn => btn.style.display = 'flex');
                 this.balloon.querySelector('.layout-btns').previousElementSibling.style.display = 'flex';
+            } else if(t.type === 'dropdown') {
+                this.balloon.querySelectorAll('.layout-btns').forEach(btn => btn.style.display = 'none');
+                this.balloon.querySelector('.layout-btns').previousElementSibling.style.display = 'none';
+
+                t.showOptionsEditor();
             }
         }
 
@@ -188,6 +193,13 @@ class BalloonEditor {
                 this.balloon.querySelector('#horizontal-layout-btn').onclick = () => {
                     newCheckbox.changeLayout('horizontal');
                 }
+            } else if(e.target.value === 'dropdown') {
+                let newDropdown = new DropdownInput(mark, parseInt(this.balloon.querySelector('#font-size').value), this.page, this.containerRect, mode, t.id);
+                newDropdown.render();
+                this.elements[t.id] = newDropdown;
+                this.balloon.querySelectorAll('.layout-btns').forEach(btn => btn.style.display = 'none');
+                this.balloon.querySelector('.layout-btns').previousElementSibling.style.display = 'none';
+                newDropdown.showOptionsEditor();
             }
 
             t = this.elements[t.id];
@@ -200,8 +212,14 @@ class BalloonEditor {
     }
 
     hide() {
-       this.balloon.style.opacity = 0;
-       this.balloon.style.visibility = 'hidden';
+        this.balloon.style.opacity = 0;
+        this.balloon.style.visibility = 'hidden';
+
+        for(let id in this.elements) {
+            if(this.elements[id].type === "dropdown" && this.elements[id].mode === 'edit') {
+                this.elements[id].hideOptionsEditor();
+            }
+        }
     }
 
     get visible() {
@@ -525,6 +543,124 @@ class CheckboxInput {
     }
 }
 
+class DropdownInput {
+    constructor(mark, fontSize, page, containerRect, mode = "edit", id = null) {
+        this.mark = mark;
+        this.fontSize = fontSize;
+        this.id = id || `dropdown-${Date.now()}`;
+        this.element;
+        this.mode = mode;
+        this.type = 'dropdown';
+        this.rect = mark.getBoundingClientRect();
+        this.rect = { width: this.rect.width, height: this.rect.height, left: this.rect.left - containerRect.left, top: this.rect.top - containerRect.top };
+        page.elements = page.elements || {};
+        page.elements[this.id] = this;
+        mark.setAttribute('data-id', this.id);
+
+        this.optionsEditor = null;
+
+        this.options = [ "Option 1", "Option 2", "Option 3" ];
+    }
+
+    prepareData() {
+        if(this.mode === 'edit') {
+            return {
+                type: this.type,
+                fontSize: this.fontSize,
+                rect: this.rect,
+                options: this.options
+            }
+        }
+    }
+
+    render() {
+        this.mark.innerHTML = '';
+        let select = document.createElement('select');
+        select.className = 'border border-slate-300 rounded px-2 py-1';
+        select.style.width = this.mark.style.width;
+        select.style.height = this.mark.style.height;
+        select.style.fontSize = `${this.fontSize}px`;
+        this.mark.appendChild(select);
+
+        for(let i = 0; i < this.options.length; i++) {
+            let option = document.createElement('option');
+            option.value = this.options[i];
+            option.innerText = this.options[i];
+            select.appendChild(option);
+        }
+
+        this.element = select;
+    }
+
+    showOptionsEditor() {
+        if(this.mode === 'edit') {
+            let div = document.createElement('div');
+            div.className = 'flex flex-col items-start gap-2 mt-2 bg-slate-100 p-2 rounded-md border-2 border-slate-500 dropdown-editor';
+
+            this.options.forEach((opt, index) => {
+                let optionDiv = document.createElement('div');
+                optionDiv.className = 'px-1';
+                let span = document.createElement('span');
+                span.innerText = opt;
+                span.contentEditable = true;
+                span.classList.add('border', 'border-slate-300', 'rounded', 'px-1');
+                span.style.fontSize = `${this.fontSize}px`;
+                span.oninput = (e) => {
+                    this.options[index] = e.target.innerText;
+                    this.element.options[index].value = e.target.innerText;
+                    this.element.options[index].innerText = e.target.innerText;
+                }
+                optionDiv.appendChild(span);
+                div.appendChild(optionDiv);
+            });
+
+            let button = document.createElement('button');
+            button.className = 'btn btn-sm btn-outline mt-2';
+            button.innerText = 'Add Option';
+
+            button.onclick = () => {
+                let index = this.options.length;
+                let optionDiv = document.createElement('div');
+                optionDiv.className = 'px-1';
+                let span = document.createElement('span');
+                span.innerText = `Option ${index + 1}`;
+                span.contentEditable = true;
+                span.classList.add('border', 'border-slate-300', 'rounded', 'px-1');
+                span.style.fontSize = `${this.fontSize}px`;
+
+                this.options.push(`Option ${index + 1}`);
+                this.element.appendChild(new Option(`Option ${index + 1}`, `Option ${index + 1}`));
+
+                span.oninput = (e) => {
+                    this.options[index] = e.target.innerText;
+                    this.element.options[index].value = e.target.innerText;
+                    this.element.options[index].innerText = e.target.innerText;
+                }
+                optionDiv.appendChild(span);
+                div.insertBefore(optionDiv, button);
+            }
+
+            div.appendChild(button);
+
+            this.mark.appendChild(div);
+
+            this.optionsEditor = div;
+        }
+    }
+
+    hideOptionsEditor() {
+        if(this.optionsEditor) {
+            this.optionsEditor.remove();
+            this.optionsEditor = null;
+        }
+    }
+
+    resizeFont(fontSize) {
+        this.fontSize = fontSize;
+        this.mark.querySelector('select').style.fontSize = `${fontSize}px`;
+    }
+}
+
 export function exportToPdf(url, pages, callback) {
     fetch(url)
     .then(res => res.arrayBuffer())
@@ -637,6 +773,14 @@ export function exportToPdf(url, pages, callback) {
                         if(el.layout === 'horizontal') {
                             cursorX += itemWidth + 8;
                         }
+                    });
+                } else if(el.type === 'dropdown') {
+                    const dropdownHeight = el.fontSize + 10;
+
+                    page.drawText(el.value || '', {
+                        x: el.rect.left + 4,
+                        y: page.getHeight() - el.rect.top - dropdownHeight + (dropdownHeight - el.fontSize) / 2,
+                        size: el.fontSize,
                     });
                 }
             }

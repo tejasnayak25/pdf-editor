@@ -7,6 +7,7 @@ import { options } from "./pdf-viewer-utils";
 import TextInput from "../components/TextInput";
 import RadioInput from "../components/RadioInput";
 import CheckboxInput from "../components/CheckboxInput";
+import DropdownInput from "../components/DropdownInput";
 
 export default function PdfSubmissionView() {
     const { pdf: pdfId, id: submissionId } = useParams();
@@ -155,6 +156,10 @@ export default function PdfSubmissionView() {
                                 } else if(element.type === "checkbox") {
                                     return (
                                         <CheckboxInput key={id} id={id} page={pageNumber} type="checkbox" fontSize={element.fontSize} layout={element.layout} rect={element.rect} options={element.options} isChecked={element.value || []} onValueChange={() => {}} readonly />
+                                    );
+                                } else if(element.type === "dropdown") {
+                                    return (
+                                        <DropdownInput key={id} id={id} page={pageNumber} type="dropdown" fontSize={element.fontSize} rect={element.rect} options={element.options} value={element.value} onValueChange={() => {}} readonly />
                                     );
                                 }
                             })}

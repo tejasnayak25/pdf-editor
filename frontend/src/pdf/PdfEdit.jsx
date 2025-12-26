@@ -85,6 +85,13 @@ export default function PdfEdit() {
 
     const handleMouseDown = (e) => {
       if(balloonsRef.current[pageNumber].visible) {
+        console.log(e.target);
+        if(e.target.classList.contains("dialog-editor") || e.target.closest(".dialog-editor")) {
+          return;
+        }
+        if(['INPUT', 'SELECT', 'OPTION', 'BUTTON', 'TEXTAREA', 'SPAN'].includes(e.target.nodeName)) {
+          return;
+        }
         if(balloonsRef.current[pageNumber].isTarget(e)) {
           return;
         } else {
@@ -234,7 +241,8 @@ export default function PdfEdit() {
                   <option value="text">Text</option>
                   <option value="radio">Radio</option>
                   <option value="checkbox">Checkbox</option>
-                  <option value="free-hand">Free-hand</option>
+                  {/* <option value="free-hand">Free-hand</option> */}
+                  <option value="dropdown">Dropdown</option>
                 </select>
 
                 <ALargeSmall className='w-5 h-5'/>

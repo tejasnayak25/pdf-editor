@@ -99,6 +99,8 @@ app.post("/api/delete-pdf", async (req, res) => {
         } else {
             await storage.deleteFile(path);
         }
+
+        res.json({ success: true, message: "PDF deleted successfully" });
     } catch (error) {
         console.error("Error connecting to database:", error);
         res.status(500).json({ success: false, message: "Internal server error" + error });

@@ -15,7 +15,9 @@ app.use(function(req, res, next) {
 });
 
 let env = process.env.ENV || "development";
-let upload = multer({ dest: env === "development" ? "uploads/" : "/tmp/" });
+let upload = env === "development"
+    ? multer({ dest: "uploads/" })
+    : multer({ storage: multer.memoryStorage() });
 
 app.use(express.json());
 
@@ -24,6 +26,11 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
     accessList = JSON.parse(accessList || "[]");
     let file = req.file;
     console.log("Received upload:", { name, description, accessList, file });
+
+    if (!file) {
+        res.status(400).json({ success: false, message: "No file uploaded" });
+        return;
+    }
 
     let filePath = "";
 
@@ -63,7 +70,7 @@ app.get("/api/user/:email", async (req, res) => {
         
         let userPdfs = await database.getUserPdfs(email);
         if (userPdfs) {
-            res.json({ success: true, user: { email, pdfs: userPdfs } });
+            res.json({ success: true, user: { email, forms: userPdfs } });
         } else {
             res.json({ success: false, message: "User not found" });
         }

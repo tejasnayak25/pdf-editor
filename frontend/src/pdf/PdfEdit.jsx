@@ -215,8 +215,8 @@ export default function PdfEdit() {
     <div className='text-slate-900 flex size-full'>
       <div className=' max-h-dvh flex-1 overflow-y-hidden flex justify-center bg-slate-950'>
         {pdf ? (
-          <div className='relative'>
-            <div className=' relative z-10'>
+          <div className='relative h-dvh'>
+            <div className=' relative z-10 h-dvh'>
               <Document options={options} file={pdf.file.url} onLoadSuccess={onDocumentLoadSuccess} className="relative z-11">
                 <Page pageNumber={pageNumber} onRenderSuccess={() => {
                   // Capture stable rect after page renders

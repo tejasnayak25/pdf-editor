@@ -165,6 +165,21 @@ app.post("/api/save-pdf-config", async (req, res) => {
         }
 
         let filePath;
+        
+        if(pdf.config) {
+            let oldConfigPath = pdf.config.url;
+            if(oldConfigPath) {
+                if(env === "development" && oldConfigPath.startsWith(storage.protocol)) {
+                    res.status(400).json({ success: false, message: "This pdf config cannot be deleted in development mode" });
+                    return;
+                }
+                if(env === "development") {
+                    fs.unlinkSync(oldConfigPath);
+                } else {
+                    await storage.deleteFile(oldConfigPath);
+                }
+            }
+        }
 
         if(env === "development") {
             fs.writeFileSync(`pdf-configs/${pdf_id}.json`, JSON.stringify(pages, null, 2));

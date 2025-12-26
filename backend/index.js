@@ -38,7 +38,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
         if(env === "development") {
             filePath = file.path;
         } else {
-            filePath = await storage.uploadFile(`${createdBy}/${name}-${Date.now()}`, file);
+            filePath = await storage.uploadFile(`${createdBy}/${name}-${Date.now()}.pdf`, file);
         }
         
         await database.connect();

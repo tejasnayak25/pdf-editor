@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom'
 import Login from './login/Login'
 import Home from './home/Home'
 import PdfEdit from './pdf/PdfEdit'
+import PdfView from './pdf/PdfView'
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/pdfs/:pdf/edit" element={<PdfEdit />} />
+        <Route path="/pdfs/:pdf/view" element={<PdfView />} />
       </Routes>
     </div>
   )

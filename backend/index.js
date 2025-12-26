@@ -20,6 +20,12 @@ let upload = env === "development"
     ? multer({ dest: "uploads/" })
     : multer({ storage: multer.memoryStorage() });
 
+if(env === "development") {
+    if (!fs.existsSync("pdf-configs")) {
+        fs.mkdirSync("pdf-configs");
+    }
+}
+
 app.use(express.json());
 
 app.post("/api/upload", upload.single("file"), async (req, res) => {
@@ -100,6 +106,19 @@ app.post("/api/delete-pdf", async (req, res) => {
             await storage.deleteFile(path);
         }
 
+        let configPath = pdf.config?.url;
+        if(configPath) {
+            if(env === "development" && configPath.startsWith(storage.protocol)) {
+                res.status(400).json({ success: false, message: "This pdf config cannot be deleted in development mode" });
+                return;
+            }
+            if(env === "development") {
+                fs.unlinkSync(configPath);
+            } else {
+                await storage.deleteFile(configPath);
+            }
+        }
+
         res.json({ success: true, message: "PDF deleted successfully" });
     } catch (error) {
         console.error("Error connecting to database:", error);
@@ -128,6 +147,40 @@ app.post("/api/pdfs/:pdfId", async (req, res) => {
     } catch (error) {
         console.error("Error fetching PDF:", error);
         res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
+
+app.post("/api/save-pdf-config", async (req, res) => {
+    let { pdf_id, pages, creator } = req.body;
+    try {
+        await database.connect();
+        let pdf = await database.getPdfById(pdf_id);
+        if (!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+        if (pdf.createdBy !== creator) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+
+        let filePath;
+
+        if(env === "development") {
+            fs.writeFileSync(`pdf-configs/${pdf_id}.json`, JSON.stringify(pages, null, 2));
+            filePath = { url: `pdf-configs/${pdf_id}.json`, path: `pdf-configs/${pdf_id}.json` };
+        } else {
+            let buffer = Buffer.from(JSON.stringify(pages, null, 2), 'utf-8');
+            filePath = await storage.uploadFile(`pdf-configs/${pdf_id}.json`, { buffer });
+        }
+
+        await database.updatePdfConfig(pdf_id, filePath);
+        res.json({ success: true, message: "PDF saved successfully" });
+    }
+    catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+        return;
     }
 });
 

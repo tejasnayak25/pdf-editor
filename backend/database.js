@@ -71,6 +71,14 @@ class Database {
         let objectId = new ObjectId(pdfId);
         await this.pdfCollection.deleteOne({ _id: objectId });
     }
+
+    updatePdfConfig(pdfId, config) {
+        let objectId = new ObjectId(pdfId);
+        return this.pdfCollection.updateOne(
+            { _id: objectId },
+            { $set: { config: config } }
+        );
+    }
 }
 
 exports.database = new Database();

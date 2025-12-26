@@ -1,0 +1,18 @@
+export default function TextInput({ type, fontSize, rect, placeholder, value, onChange }) {
+    return (
+        <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            className="border border-slate-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 absolute"
+            style={{
+                fontSize: fontSize + 'px',
+                top: rect?.top + 'px',
+                left: rect?.left + 'px',
+                width: rect?.width + 'px',
+                height: rect?.height + 'px',
+            }}
+        />
+    );
+}

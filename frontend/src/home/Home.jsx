@@ -168,7 +168,7 @@ export default function Home() {
                                             <a href={`/pdfs/${pdf._id}/edit`} className="btn btn-outline">Edit</a>
                                         ) }
                                         { isTeacher && (
-                                            <button onClick={() => handleDelete(pdf._id, pdf.file.path)} className="btn btn-square btn-error"><Trash2 className="w-4 h-4" /></button>
+                                            <button onClick={() => handleDelete(pdf._id, pdf.file.url)} className="btn btn-square btn-error"><Trash2 className="w-4 h-4" /></button>
                                         ) }
                                     </div>
                                 </div>

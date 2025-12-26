@@ -90,7 +90,11 @@ app.post("/api/delete-pdf", async (req, res) => {
         await database.deletePdf(id);
 
         if(env === "development") {
-            fs.unlinkSync(path);
+            if(path.startsWith(database.protocol)) {
+                await storage.deleteFile(path);
+            } else {
+                fs.unlinkSync(path);
+            }
         } else {
             await storage.deleteFile(path);
         }

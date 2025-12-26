@@ -57,6 +57,8 @@ export default function PdfSubmissionView() {
                 .then(data => {
                     setConfig(data);
 
+                    console.log("Fetching submission data for ID:", data);
+
                     if(submissionId) {
                         fetch(`/api/pdfs/${pdfId}/get-submission`, {
                             method: 'POST',

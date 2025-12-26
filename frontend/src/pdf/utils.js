@@ -775,7 +775,7 @@ export function exportToPdf(url, pages, callback) {
                         }
                     });
                 } else if(el.type === 'dropdown') {
-                    const dropdownHeight = el.fontSize + 10;
+                    const dropdownHeight = el.rect.height;
 
                     page.drawText(el.value || '', {
                         x: el.rect.left + 4,

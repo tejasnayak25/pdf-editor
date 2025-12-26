@@ -10,7 +10,11 @@ export default function DropdownInput({ id, page, type, fontSize, rect, options,
                     width: rect?.width + 'px',
                     height: rect?.height + 'px',
                 }}
-                value={value} />
+                value={value} disabled>
+                    {options.map((option, index) => (
+                        <option key={index} value={option}>{option}</option>
+                    ))}
+                </select>
         ) : (
             <select
                 className={`absolute border border-slate-300 rounded px-2 py-1 bg-white item-${type}`}

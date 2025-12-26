@@ -4,6 +4,7 @@ let multer = require("multer");
 let cors = require("cors");
 let database = require("./database").database;
 let storage = require("./storage").storage;
+let fs = require("fs");
 
 app.use(cors());
 
@@ -36,7 +37,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 
     try {
         if(env === "development") {
-            filePath = file.path;
+            filePath = { url: file.path, path: file.path };
         } else {
             filePath = await storage.uploadFile(`${createdBy}/${name}-${Date.now()}.pdf`, file);
         }
@@ -47,20 +48,57 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
             name,
             description,
             accessList,
-            filePath: filePath,
+            file: {
+                url: filePath.url,
+                path: filePath.path
+            },
             createdBy,
             createdAt: new Date(),
             updatedAt: new Date()
         });
 
-        res.json({ success: true });
+        res.json({ success: true, message: "File uploaded successfully" });
     } catch (error) {
         console.error("Error creating PDF:", error);
         res.status(500).json({ success: false, message: "Internal server error" + error });
         return;
     }
+});
 
-    res.json({ success: true, message: "File uploaded successfully" });
+app.post("/api/delete-pdf", async (req, res) => {
+    let { pdfId, path, email } = req.body;
+
+    if(!email) {
+        res.status(401).json({ success: false, message: "Unauthorized" });
+        return;
+    }
+
+    try {
+        await database.connect();
+
+        let pdf = await database.getPdfById(pdfId);
+        if(!pdf) {
+            res.status(404).json({ success: false, message: "PDF not found" });
+            return;
+        }
+
+        if(pdf.createdBy !== email) {
+            res.status(403).json({ success: false, message: "Forbidden" });
+            return;
+        }
+
+        await database.deletePdf(pdfId);
+
+        if(env === "development") {
+            fs.unlinkSync(path);
+        } else {
+            await storage.deleteFile(path);
+        }
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" + error });
+        return;
+    }
 });
 
 app.get("/api/user/:email", async (req, res) => {

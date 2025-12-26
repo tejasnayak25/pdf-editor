@@ -1,4 +1,4 @@
-import { LogOut, Upload } from "lucide-react";
+import { Delete, Link, LogOut, Trash, Trash2, Upload } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
@@ -14,6 +14,22 @@ export default function Home() {
     const pdfDescRef = useRef();
     const uploadRef = useRef();
     const accessRef = useRef();
+
+    function refreshPdfs() {
+        fetch(`/api/user/${user.email}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    console.log("User data fetched:", data.user);
+                    setPdfs(data.user.pdfs || []);
+                } else {
+                    setPdfs([]);
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching user data:", err);
+            });
+    }
 
     useEffect(() => {
         if (!user) {
@@ -77,11 +93,41 @@ export default function Home() {
             pdfDescRef.current.value = "";
             accessRef.current.value = "";
             setSelectedFile(null);
+            refreshPdfs();
         })
         .catch(err => {
             console.error(err);
             alert("Error uploading PDF");
         });
+    }
+
+    function handleDelete(pdfId, path) {
+        if(window.confirm("Are you sure you want to delete this PDF? This action cannot be undone.")) {
+            fetch("/api/delete-pdf", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    pdfId: pdfId,
+                    path: path,
+                    email: user.email
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    alert("PDF deleted successfully");
+                    setPdfs(prevPdfs => prevPdfs.filter(pdf => pdf._id !== pdfId));
+                } else {
+                    alert("Error deleting PDF: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error deleting PDF");
+            });
+        }
     }
     
     const isTeacher = user?.role === "teacher";
@@ -113,8 +159,18 @@ export default function Home() {
                         { pdfs.map((pdf, index) => (
                             <div key={index} className="card m-4 bg-white text-slate-900 shadow-xl hover:shadow-2xl">
                                 <div className="card-body">
-                                    <h2 className="card-title">{pdf.name}</h2>
+                                    <a href={`/pdfs/${pdf._id}/view`} target="_blank" rel="noreferrer" className="card-title flex items-center gap-2 hover:underline">{pdf.name} <Link className="w-4 h-4" /></a>
                                     <p className="text-slate-700">{pdf.description || "No description provided."}</p>
+                                    <p className="text-slate-700 text-sm">{pdf.createdAt ? new Date(pdf.createdAt).toLocaleString() : ""}</p>
+                                    <div className="card-actions flex justify-end gap-2 items-center mt-2">
+                                        <a href={`/pdfs/${pdf._id}/submissions`} target="_blank" rel="noreferrer" className="btn btn-primary">View Submissions</a>
+                                        { isTeacher && (
+                                            <a href={`/pdfs/${pdf._id}/edit`} className="btn btn-outline">Edit</a>
+                                        ) }
+                                        { isTeacher && (
+                                            <button onClick={() => handleDelete(pdf._id, pdf.file.path)} className="btn btn-square btn-error"><Trash2 className="w-4 h-4" /></button>
+                                        ) }
+                                    </div>
                                 </div>
                             </div>
                         )) }

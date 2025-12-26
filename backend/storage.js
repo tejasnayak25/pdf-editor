@@ -1,4 +1,4 @@
-const { put } = require("@vercel/blob");
+const { put, del } = require("@vercel/blob");
 
 class Storage {
     constructor() {
@@ -8,7 +8,11 @@ class Storage {
         const fileData = await put(name, file.buffer, {
             access: "public"
         });
-        return fileData.url;
+        return { url: fileData.url, path: name };
+    }
+
+    async deleteFile(path) {
+        await del(path);
     }
 }
 

@@ -36,7 +36,7 @@ class Database {
             })
             .catch(error => {
                 console.error("Error connecting to MongoDB:", error);
-                
+
                 this.client = null;
                 throw error;
             })
@@ -58,8 +58,16 @@ class Database {
         return results;
     }
 
+    getPdfById(pdfId) {
+        return this.pdfCollection.findOne({ _id: pdfId });
+    }
+
     createPdf(pdf) {
         return this.pdfCollection.insertOne(pdf);
+    }
+
+    async deletePdf(pdfId) {
+        await this.pdfCollection.deleteOne({ _id: pdfId });
     }
 }
 

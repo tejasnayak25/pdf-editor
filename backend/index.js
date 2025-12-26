@@ -66,7 +66,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 });
 
 app.post("/api/delete-pdf", async (req, res) => {
-    let { pdfId, path, email } = req.body;
+    let { id, path, email } = req.body;
 
     if(!email) {
         res.status(401).json({ success: false, message: "Unauthorized" });
@@ -76,7 +76,7 @@ app.post("/api/delete-pdf", async (req, res) => {
     try {
         await database.connect();
 
-        let pdf = await database.getPdfById(pdfId);
+        let pdf = await database.getPdfById(id);
         if(!pdf) {
             res.status(404).json({ success: false, message: "PDF not found" });
             return;
@@ -87,7 +87,7 @@ app.post("/api/delete-pdf", async (req, res) => {
             return;
         }
 
-        await database.deletePdf(pdfId);
+        await database.deletePdf(id);
 
         if(env === "development") {
             fs.unlinkSync(path);

@@ -109,7 +109,7 @@ export default function Home() {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    pdfId: pdfId,
+                    id: pdfId,
                     path: path,
                     email: user.email
                 })

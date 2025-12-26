@@ -27,13 +27,13 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 
     let filePath = "";
 
-    if(env === "development") {
-        filePath = file.path;
-    } else {
-        filePath = await storage.uploadFile(`${createdBy}/${name}-${Date.now()}`, file);
-    }
-
     try {
+        if(env === "development") {
+            filePath = file.path;
+        } else {
+            filePath = await storage.uploadFile(`${createdBy}/${name}-${Date.now()}`, file);
+        }
+        
         await database.connect();
 
         await database.createPdf({

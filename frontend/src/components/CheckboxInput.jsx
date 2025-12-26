@@ -12,7 +12,7 @@ function CheckboxInput({ id, page, type, fontSize, layout, rect, options, isChec
                 height: rect?.height + 'px',
             }}
         >
-            <div className={`flex ${layout === 'horizontal' ? 'flex-row' : 'flex-col'} gap-2`}>
+            <div className={`flex ${layout === 'horizontal' ? 'flex-row flex-wrap' : 'flex-col'} gap-2`}>
                 {options.map((option, index) => (
                     <label key={index} className="flex items-center gap-2">
                         {readonly ? (<input

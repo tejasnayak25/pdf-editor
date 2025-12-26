@@ -544,24 +544,39 @@ export function exportToPdf(url, pages, callback) {
                         size: el.fontSize,
                     });
                 } else if(el.type === 'radio') {
-                    let optionHeight = el.fontSize + 10;
+                    const optionHeight = el.fontSize + 10;
+                    const maxWidth = el.rect.width;
+                    let cursorX = el.rect.left;
+                    let cursorY = page.getHeight() - el.rect.top - optionHeight + 4;
+
                     el.options.forEach((option, index) => {
-                        let x = el.rect.left;
-                        let y = page.getHeight() - el.rect.top - (index * (el.layout === 'horizontal' ? 0 : optionHeight)) - (el.layout === 'horizontal' ? 0 : optionHeight) + 4;
-                        if(el.layout === 'horizontal') {
-                            x += index * (el.fontSize + 20);
+                        const textWidth = option.length * el.fontSize * 0.6;
+                        const itemWidth = el.fontSize + 6 + textWidth; // circle + gap + text
+
+                        if(el.layout === 'horizontal' && cursorX + itemWidth > el.rect.left + maxWidth) {
+                            cursorX = el.rect.left;
+                            cursorY -= optionHeight;
                         }
+
+                        const x = cursorX;
+                        const y = el.layout === 'horizontal'
+                            ? cursorY
+                            : page.getHeight() - el.rect.top - (index * optionHeight) - optionHeight + 4;
+
+                        const centerX = x + el.fontSize / 2;
+                        const centerY = y - 2 + el.fontSize / 2;
+
                         page.drawCircle({
-                            x: x + el.fontSize / 2 - 2,
-                            y: y - 4 + el.fontSize / 2,
+                            x: centerX,
+                            y: centerY,
                             size: el.fontSize / 2,
                             borderColor: rgb(96/255, 93/255, 255/255),
                             borderWidth: 1,
                             color: el.value === option ? rgb(0, 0, 0) : rgb(1, 1, 1),
                         });
                         page.drawCircle({
-                            x: x + el.fontSize / 2 - 2,
-                            y: y - 4 + el.fontSize / 2,
+                            x: centerX,
+                            y: centerY,
                             size: el.fontSize / 2 - 3.5,
                             color: el.value === option ? rgb(96/255, 93/255, 255/255) : rgb(1, 1, 1),
                         });
@@ -570,15 +585,31 @@ export function exportToPdf(url, pages, callback) {
                             y: y - 2,
                             size: el.fontSize,
                         });
+
+                        if(el.layout === 'horizontal') {
+                            cursorX += itemWidth + 8; // extra gap between options
+                        }
                     });
                 } else if(el.type === 'checkbox') {
-                    let optionHeight = el.fontSize + 10;
+                    const optionHeight = el.fontSize + 10;
+                    const maxWidth = el.rect.width;
+                    let cursorX = el.rect.left;
+                    let cursorY = page.getHeight() - el.rect.top - optionHeight + 4;
+
                     el.options.forEach((option, index) => {
-                        let x = el.rect.left;
-                        let y = page.getHeight() - el.rect.top - (index * (el.layout === 'horizontal' ? 0 : optionHeight)) - (el.layout === 'horizontal' ? 0 : optionHeight) + 4;
-                        if(el.layout === 'horizontal') {
-                            x += index * (el.fontSize + 20);
+                        const textWidth = option.length * el.fontSize * 0.6;
+                        const itemWidth = el.fontSize + 6 + textWidth; // box + gap + text
+
+                        if(el.layout === 'horizontal' && cursorX + itemWidth > el.rect.left + maxWidth) {
+                            cursorX = el.rect.left;
+                            cursorY -= optionHeight;
                         }
+
+                        const x = cursorX;
+                        const y = el.layout === 'horizontal'
+                            ? cursorY
+                            : page.getHeight() - el.rect.top - (index * optionHeight) - optionHeight + 4;
+
                         page.drawRectangle({
                             x: x - 2,
                             y: y - 4,
@@ -602,6 +633,10 @@ export function exportToPdf(url, pages, callback) {
                             y: y - 2,
                             size: el.fontSize,
                         });
+
+                        if(el.layout === 'horizontal') {
+                            cursorX += itemWidth + 8;
+                        }
                     });
                 }
             }

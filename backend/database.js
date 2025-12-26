@@ -59,7 +59,8 @@ class Database {
     }
 
     getPdfById(pdfId) {
-        return this.pdfCollection.findOne({ _id: pdfId });
+        let objectId = new ObjectId(pdfId);
+        return this.pdfCollection.findOne({ _id: objectId });
     }
 
     createPdf(pdf) {

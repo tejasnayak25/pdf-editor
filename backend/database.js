@@ -11,11 +11,12 @@ class Database {
         this.db = this.client.db("pdf-editor");
         this.userCollection = this.db.collection("users");
         this.pdfCollection = this.db.collection("pdfs");
+        this.promise = this.client.connect();
     }
 
     async connect() {
         try {
-            await this.client.connect();
+            await this.promise;
             console.log("Connected to MongoDB");
         } catch (error) {
             console.error("Error connecting to MongoDB:", error);

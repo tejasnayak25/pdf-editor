@@ -19,8 +19,6 @@ let upload = multer({ dest: env === "development" ? "uploads/" : "/tmp/" });
 
 app.use(express.json());
 
-database.connect();
-
 app.post("/api/upload", upload.single("file"), async (req, res) => {
     let { name, description, accessList, createdBy } = req.body;
     accessList = JSON.parse(accessList || "[]");
@@ -36,6 +34,8 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
     }
 
     try {
+        await database.connect();
+
         await database.createPdf({
             name,
             description,
@@ -59,6 +59,8 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 app.get("/api/user/:email", async (req, res) => {
     let email = req.params.email;
     try {
+        await database.connect();
+        
         let userPdfs = await database.getUserPdfs(email);
         if (userPdfs) {
             res.json({ success: true, user: { email, pdfs: userPdfs } });

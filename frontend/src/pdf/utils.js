@@ -24,7 +24,7 @@ class BalloonEditor {
         this.containerRect = null;
     }
 
-    init(pageNumber, mode = "edit") {
+    init(pageNumber, mode = "edit", config = null) {
         this.pageNumber = pageNumber;
         this.containerRect = this.overlay.getBoundingClientRect();
 
@@ -36,6 +36,31 @@ class BalloonEditor {
         this.page = this.pages[pageNumber];
 
         this.elements = this.pages[pageNumber].elements;
+
+        if(this.elements && Object.keys(this.elements).length === 0 && Object.keys(config.elements).length > 0) {
+            Object.entries(config.elements).forEach(([id, elementData]) => {
+                let mark = document.createElement('div');
+                mark.className = 'pdf-mark border-2 border-slate-500 bg-slate-300/50 rounded-md absolute';
+                let rect = elementData.rect || { width: 200, height: 50, left: 50, top: 50 };
+                mark.style.width = rect.width + 'px';
+                mark.style.height = rect.height + 'px';
+                mark.style.left = rect.left + 'px';
+                mark.style.top = rect.top + 'px';
+                mark.setAttribute('data-tag', 'pdf-mark');
+                mark.setAttribute('data-id', id);
+                if (this.overlay) this.overlay.appendChild(mark);
+
+                let el;
+                if(elementData.type === 'text') {
+                    el = new TextInput(mark, elementData.fontSize, this.page, this.containerRect, mode, id);
+                } else if(elementData.type === 'radio') {
+                    el = new RadioInput(mark, elementData.fontSize, elementData.layout, this.page, this.containerRect, mode, id);
+                } else if(elementData.type === 'checkbox') {
+                    el = new CheckboxInput(mark, elementData.fontSize, elementData.layout, this.page, this.containerRect, mode, id);
+                }
+                this.elements[id] = el;
+            });
+        }
 
         if(mode === "edit") {
             for(let id in this.elements) {

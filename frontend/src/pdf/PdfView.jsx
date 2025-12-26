@@ -5,6 +5,7 @@ import { Document, Page } from "react-pdf";
 import { ChevronLeft, ChevronUp, ChevronDown, Save } from "lucide-react";
 import { options } from "./pdf-viewer-utils";
 import TextInput from "../components/TextInput";
+import RadioInput from "../components/RadioInput";
 
 export default function PdfView() {
     const { pdf: pdfId } = useParams();
@@ -44,7 +45,9 @@ export default function PdfView() {
         if(pdf.config) {
             fetch(pdf.config.url)
                 .then(res => res.json())
-                .then(data => setConfig(data))
+                .then(data => {
+                    setConfig(data);
+                })
                 .catch(err => {
                     console.error("Error fetching PDF config:", err);
                     setConfig(null);
@@ -55,6 +58,21 @@ export default function PdfView() {
     function onDocumentLoadSuccess({ numPages }) {
         setNumPages(numPages);
         setPageNumber(1);
+    }
+
+    const valuesRef = useRef({});
+
+    function changeHandler(id, value) {
+        valuesRef.current[id] = value;
+        let configCopy = { ...config };
+        if(!configCopy[pageNumber]) {
+            configCopy[pageNumber] = { elements: {} };
+        }
+        if(!configCopy[pageNumber].elements[id]) {
+            configCopy[pageNumber].elements[id] = {};
+        }
+        configCopy[pageNumber].elements[id].value = value;
+        setConfig(configCopy);
     }
 
     const handleSave = () => {
@@ -71,10 +89,14 @@ export default function PdfView() {
                             <Page pageNumber={pageNumber} />
                         </Document>
                         <div ref={canvasRef} className='absolute top-0 left-0 w-full h-full z-12'>
-                            {config && config[pageNumber - 1] && config[pageNumber - 1].elements.map(element => {
+                            {config && config[pageNumber] && Object.entries(config[pageNumber].elements).map(([id, element]) => {
                                 if(element.type === "text") {
                                     return (
-                                        <TextInput type="text" fontSize={element.fontSize} rect={element.rect} placeholder={element.placeholder} value={""} onChange={() => {}} />
+                                        <TextInput key={id} type="text" fontSize={element.fontSize} rect={element.rect} placeholder={element.placeholder} value={element.value || ""} onChange={(e) => changeHandler(id, e.target.value)} />
+                                    );
+                                } else if(element.type === "radio") {
+                                    return (
+                                        <RadioInput key={id} type="radio" fontSize={element.fontSize} layout={element.layout} rect={element.rect} options={element.options} selectedValue={element.value} onChange={(e) => changeHandler(id, e.target.value)} />
                                     );
                                 }
                             })}

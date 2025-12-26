@@ -12,6 +12,7 @@ export default function PdfEdit() {
     return raw ? JSON.parse(raw) : null;
   });
   const userEmail = user?.email;
+  const [ config, setConfig ] = useState(null);
 
   const [ pdf, setPdf ] = useState(null);
   const canvasRef = useRef(null);
@@ -34,6 +35,21 @@ export default function PdfEdit() {
         });
   }, [pdfId, userEmail]);
 
+  useEffect(() => {
+        if(!pdf) return;
+        if(pdf.config) {
+            fetch(pdf.config.url)
+                .then(res => res.json())
+                .then(data => {
+                    setConfig(data);
+                })
+                .catch(err => {
+                    console.error("Error fetching PDF config:", err);
+                    setConfig(null);
+                });
+        }
+  }, [pdf]);
+
   const [numPages, setNumPages] = useState();
   const [pageNumber, setPageNumber] = useState(0);
 
@@ -48,21 +64,17 @@ export default function PdfEdit() {
     setPageNumber(page);
   }
 
-  // Initialize balloon editor after page renders
   const initializeEditor = () => {
     const canvasContainer = canvasRef.current;
     if(!canvasContainer) return;
 
     canvasContainer.innerHTML = '';
 
-    console.log("Initializing balloon editor for page:", pagesRef.current[pageNumber]);
-
-    // Capture containerRect after page has rendered
     containerRectRef.current = canvasContainer.getBoundingClientRect();
 
     balloonsRef.current[pageNumber] = balloonEditor(balloonRef.current, canvasContainer, pageNumber, pagesRef.current);
 
-    balloonsRef.current[pageNumber].init(pageNumber, (user?.role === "teacher") ? "edit" : "view");
+    balloonsRef.current[pageNumber].init(pageNumber, (user?.role === "teacher") ? "edit" : "view", config[pageNumber]);
   }
 
   useEffect(() => {
@@ -132,7 +144,6 @@ export default function PdfEdit() {
     };
   }, [pageNumber, user?.role]);
 
-  // Re-initialize editor when page changes (deferred until after render)
   useEffect(() => {
     const timer = setTimeout(() => {
       initializeEditor();

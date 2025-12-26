@@ -7,7 +7,8 @@ class Storage {
 
     async uploadFile(name, file) {
         const fileData = await put(name, file.buffer, {
-            access: "public"
+            access: "public",
+            allowOverwrite: true,
         });
         return { url: fileData.url, path: name };
     }

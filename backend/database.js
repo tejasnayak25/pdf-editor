@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 class Database {
     constructor() {
@@ -67,7 +67,8 @@ class Database {
     }
 
     async deletePdf(pdfId) {
-        await this.pdfCollection.deleteOne({ _id: pdfId });
+        let objectId = new ObjectId(pdfId);
+        await this.pdfCollection.deleteOne({ _id: objectId });
     }
 }
 

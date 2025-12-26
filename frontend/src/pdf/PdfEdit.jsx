@@ -175,7 +175,7 @@ export default function PdfEdit() {
         pdfData.pages[pageNum] = pageData;
       }
 
-      await fetch('/api/save-pdf', {
+      await fetch('/api/save-pdf-config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

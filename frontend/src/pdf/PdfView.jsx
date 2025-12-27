@@ -205,9 +205,6 @@ export default function PdfView() {
 
         fetch(`/api/pdfs/${pdfId}/save-${mode}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
             body: formdata,
         }).then(res => res.json())
         .then(data => {

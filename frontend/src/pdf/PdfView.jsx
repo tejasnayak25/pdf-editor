@@ -191,7 +191,7 @@ export default function PdfView() {
         let formdata = new FormData();
 
         Object.entries(values).forEach(([key, value]) => {
-            if(value instanceof String && value.startsWith("data:image/")) {
+            if(typeof value === "string" && value.startsWith("data:image/")) {
                 const blob = dataURLToBlob(value);
                 formdata.append(key, blob, `${key}.png`);
                 values[key] = `file://${key}.png`;

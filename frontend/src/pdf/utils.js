@@ -62,6 +62,9 @@ class BalloonEditor {
                 } else if(elementData.type === 'checkbox') {
                     el = new CheckboxInput(mark, elementData.fontSize, elementData.layout, this.page, this.containerRect, mode, id);
                     el.options = elementData.options || [ "Option 1", "Option 2", "Option 3" ];
+                } else if(elementData.type === 'dropdown') {
+                    el = new DropdownInput(mark, elementData.fontSize, this.page, this.containerRect, mode, id);
+                    el.options = elementData.options || [ "Option 1", "Option 2", "Option 3" ];
                 }
                 this.elements[id] = el;
             });

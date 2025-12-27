@@ -28,6 +28,41 @@ if(env === "development") {
 
 app.use(express.json());
 
+app.post("/api/signup", async (req, res) => {
+    let { email, password, role } = req.body;
+    try {
+        await database.connect();
+        let existingUser = await database.findUser(email, password, role);
+        if (existingUser) {
+            res.json({ success: false, message: "User already exists" });
+            return;
+        }
+        await database.createUser({ email, password, role });
+        res.json({ success: true, message: "User created successfully" });
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+        return;
+    }
+});
+
+app.post("/api/login", async (req, res) => {
+    let { email, password, role } = req.body;
+    try {
+        await database.connect();
+        let user = await database.findUser(email, password, role);
+        if (user) {
+            res.json({ success: true, user: { email: user.email, role: user.role } });
+        } else {
+            res.json({ success: false, message: "Invalid credentials" });
+        }
+    } catch (error) {
+        console.error("Error connecting to database:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+        return;
+    }
+});
+
 app.post("/api/upload", upload.single("file"), async (req, res) => {
     let { name, description, accessList, createdBy } = req.body;
     accessList = JSON.parse(accessList || "[]");

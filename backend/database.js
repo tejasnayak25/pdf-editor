@@ -51,6 +51,14 @@ class Database {
         return this.connectPromise;
     }
 
+    createUser(user) {
+        return this.userCollection.insertOne(user);
+    }
+
+    findUser(email, password, role) {
+        return this.userCollection.findOne({ email: email, password: password, role: role });
+    }
+
     async getUserPdfs(email) {
         const results = await this.pdfCollection.find({
             $or: [

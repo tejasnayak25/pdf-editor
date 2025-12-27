@@ -1,5 +1,6 @@
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
+import Signup from './signup/Signup'
 import Login from './login/Login'
 import Home from './home/Home'
 import PdfEdit from './pdf/PdfEdit'
@@ -13,6 +14,7 @@ function App() {
     <div className='size-full min-w-full min-h-dvh bg-slate-200'>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/pdfs/:pdf/edit" element={<PdfEdit />} />
         <Route path="/pdfs/:pdf/view" element={<PdfView />} />

@@ -20,7 +20,7 @@ export default function Login() {
         }
         let user = { email, role, password };
         
-        fetch("http://localhost:4000/api/login", {
+        fetch("/api/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

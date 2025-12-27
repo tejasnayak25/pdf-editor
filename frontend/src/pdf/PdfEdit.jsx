@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { balloonEditor, getPdf } from './utils';
 import { options } from "./pdf-viewer-utils";
 import { Document, Page } from 'react-pdf';
-import { ALargeSmall, ChevronDown, ChevronLeft, ChevronUp, Save, Text, Trash2, UnfoldHorizontal, UnfoldVertical } from 'lucide-react';
+import { ALargeSmall, ChevronDown, ChevronLeft, ChevronUp, Loader2, Save, Text, Trash2, UnfoldHorizontal, UnfoldVertical } from 'lucide-react';
 
 export default function PdfEdit() {
   const { pdf:pdfId } = useParams();

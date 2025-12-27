@@ -269,7 +269,8 @@ app.post("/api/pdfs/:pdfId/save-submission", upload.any(), async (req, res) => {
                 if (env === "development") {
                     values[key] = file.path;
                 } else {
-                    values[key] = await storage.uploadFile(`pdf-files/${pdfId}/${userEmail}/${Date.now()}/${file.originalname}`, file);
+                    let uploadData = await storage.uploadFile(`pdf-files/${pdfId}/${userEmail}/${Date.now()}/${file.originalname}`, file);
+                    values[key] = uploadData.url;
                 }
             }
         }

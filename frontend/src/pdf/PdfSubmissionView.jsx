@@ -8,6 +8,7 @@ import TextInput from "../components/TextInput";
 import RadioInput from "../components/RadioInput";
 import CheckboxInput from "../components/CheckboxInput";
 import DropdownInput from "../components/DropdownInput";
+import CanvasInput from "../components/CanvasInput";
 
 export default function PdfSubmissionView() {
     const { pdf: pdfId, id: submissionId } = useParams();
@@ -162,6 +163,10 @@ export default function PdfSubmissionView() {
                                 } else if(element.type === "dropdown") {
                                     return (
                                         <DropdownInput key={id} id={id} page={pageNumber} type="dropdown" fontSize={element.fontSize} rect={element.rect} options={element.options} value={element.value} onValueChange={() => {}} readonly />
+                                    );
+                                } else if(element.type === "canvas") {
+                                    return (
+                                        <CanvasInput key={id} id={id} page={pageNumber} rect={element.rect} value={element.value || ""} onValueChange={() => {}} readonly />
                                     );
                                 }
                             })}

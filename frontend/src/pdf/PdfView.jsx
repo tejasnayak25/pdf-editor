@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { exportToPdf, getPdf } from "./utils";
+import { dataURLToBlob, exportToPdf, getPdf } from "./utils";
 import { Document, Page } from "react-pdf";
 import { ChevronLeft, ChevronUp, ChevronDown, Save, History, Loader, Loader2, Printer } from "lucide-react";
 import { options } from "./pdf-viewer-utils";
@@ -8,6 +8,7 @@ import TextInput from "../components/TextInput";
 import RadioInput from "../components/RadioInput";
 import CheckboxInput from "../components/CheckboxInput";
 import DropdownInput from "../components/DropdownInput";
+import CanvasInput from "../components/CanvasInput";
 
 export default function PdfView() {
     const { pdf: pdfId } = useParams();
@@ -184,15 +185,30 @@ export default function PdfView() {
 
     const handleSave = (mode = "draft") => {
         if(!pdf) return;
+
+        let values = valuesRef.current;
+
+        let formdata = new FormData();
+
+        Object.entries(values).forEach(([key, value]) => {
+            if(value instanceof String && value.startsWith("data:image/")) {
+                const blob = dataURLToBlob(value);
+                formdata.append(key, blob, `${key}.png`);
+                values[key] = `file://${key}.png`;
+            } else {
+                values[key] = value;
+            }
+        });
+
+        formdata.append('userEmail', userEmail);
+        formdata.append('values', JSON.stringify(values));
+
         fetch(`/api/pdfs/${pdfId}/save-${mode}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'multipart/form-data',
             },
-            body: JSON.stringify({
-                userEmail: userEmail,
-                values: valuesRef.current,
-            }),
+            body: formdata,
         }).then(res => res.json())
         .then(data => {
             if(data.success) {
@@ -259,6 +275,10 @@ export default function PdfView() {
                                 } else if(element.type === "dropdown") {
                                     return (
                                         <DropdownInput key={id} id={id} page={pageNumber} type="dropdown" fontSize={element.fontSize} rect={element.rect} options={element.options} value={element.value} onValueChange={handleValueChange} />
+                                    );
+                                } else if(element.type === "canvas") {
+                                    return (
+                                        <CanvasInput key={id} id={id} page={pageNumber} rect={element.rect} value={element.value || ""} onValueChange={handleValueChange} />
                                     );
                                 }
                             })}

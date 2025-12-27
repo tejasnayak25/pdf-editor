@@ -184,51 +184,107 @@ app.post("/api/save-pdf-config", async (req, res) => {
     }
 });
 
-app.post("/api/pdfs/:pdfId/save-draft", async (req, res) => {
+app.post("/api/pdfs/:pdfId/save-draft", upload.any(), async (req, res) => {
     let pdfId = req.params.pdfId;
     let { userEmail, values } = req.body;
+
+    if (typeof values === "string") {
+      values = JSON.parse(values);
+    }
+
     try {
-        await database.connect();
-        let pdf = await database.getPdfById(pdfId);
-        if (!pdf) {
-            res.status(404).json({ success: false, message: "PDF not found" });
-            return;
+      await database.connect();
+
+      const pdf = await database.getPdfById(pdfId);
+      if (!pdf) {
+        return res.status(404).json({ success: false, message: "PDF not found" });
+      }
+
+      if (!pdf.accessList?.includes(userEmail)) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      const uploadedFiles = {};
+      for (const file of req.files) {
+        uploadedFiles[file.fieldname] = file;
+      }
+
+      for (const key of Object.keys(values)) {
+        if (typeof values[key] === "string" && values[key].startsWith("file://")) {
+            const file = uploadedFiles[key];
+
+            if (file) {
+                if (env === "development") {
+                    values[key] = file.path;
+                } else {
+                    values[key] = await storage.uploadFile(`pdf-files/${pdfId}/${userEmail}/${Date.now()}/${file.originalname}`, file);
+                }
+            }
         }
-        if (!(pdf.accessList && pdf.accessList.includes(userEmail))) {
-            res.status(403).json({ success: false, message: "Forbidden" });
-            return;
-        }
-        let result = await database.savePdfDraft(pdfId, userEmail, values);
-        res.json({ success: true, id: result.insertedId, message: "Draft saved successfully" });
+      }
+
+      const result = await database.savePdfDraft(pdfId, userEmail, values);
+
+      res.json({
+        success: true,
+        id: result.insertedId,
+        message: "Draft saved successfully"
+      });
     } catch (error) {
-        console.error("Error connecting to database:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
-        return;
+      console.error(error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
 });
 
-app.post("/api/pdfs/:pdfId/save-submission", async (req, res) => {
+app.post("/api/pdfs/:pdfId/save-submission", upload.any(), async (req, res) => {
     let pdfId = req.params.pdfId;
     let { userEmail, values } = req.body;
 
-    try {
-        await database.connect();
-        let pdf = await database.getPdfById(pdfId);
-        if (!pdf) {
-            res.status(404).json({ success: false, message: "PDF not found" });
-            return;
-        }
+    if (typeof values === "string") {
+      values = JSON.parse(values);
+    }
 
-        if (!(pdf.accessList && pdf.accessList.includes(userEmail))) {
-            res.status(403).json({ success: false, message: "Forbidden" });
-            return;
+    try {
+      await database.connect();
+
+      const pdf = await database.getPdfById(pdfId);
+      if (!pdf) {
+        return res.status(404).json({ success: false, message: "PDF not found" });
+      }
+
+      if (!pdf.accessList?.includes(userEmail)) {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      const uploadedFiles = {};
+      for (const file of req.files) {
+        uploadedFiles[file.fieldname] = file;
+      }
+
+      for (const key of Object.keys(values)) {
+        if (typeof values[key] === "string" && values[key].startsWith("file://")) {
+            const file = uploadedFiles[key];
+
+            if (file) {
+                if (env === "development") {
+                    values[key] = file.path;
+                } else {
+                    values[key] = await storage.uploadFile(`pdf-files/${pdfId}/${userEmail}/${Date.now()}/${file.originalname}`, file);
+                }
+            }
         }
-        let result = await database.savePdfSubmission(pdfId, userEmail, values);
-        res.json({ success: true, id: result.insertedId, message: "Submission saved successfully" });
+      }
+
+      const result = await database.savePdfSubmission(pdfId, userEmail, values);
+
+      res.json({
+        success: true,
+        id: result.insertedId,
+        message: "Submission saved successfully"
+      });
     } catch (error) {
-        console.error("Error connecting to database:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
-        return;
+      console.error(error);
+      res.status(500).json({ success: false, message: "Internal server error" });
     }
 });
 

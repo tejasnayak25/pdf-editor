@@ -65,6 +65,8 @@ class BalloonEditor {
                 } else if(elementData.type === 'dropdown') {
                     el = new DropdownInput(mark, elementData.fontSize, this.page, this.containerRect, mode, id);
                     el.options = elementData.options || [ "Option 1", "Option 2", "Option 3" ];
+                } else if(elementData.type === 'canvas') {
+                    el = new CanvasInput(mark, this.page, this.containerRect, mode, id);
                 }
                 this.elements[id] = el;
             });
@@ -203,6 +205,10 @@ class BalloonEditor {
                 this.balloon.querySelectorAll('.layout-btns').forEach(btn => btn.style.display = 'none');
                 this.balloon.querySelector('.layout-btns').previousElementSibling.style.display = 'none';
                 newDropdown.showOptionsEditor();
+            } else if(e.target.value === 'canvas') {
+                let newCanvas = new CanvasInput(mark, this.page, this.containerRect, mode, t.id);
+                newCanvas.render();
+                this.elements[t.id] = newCanvas;
             }
 
             t = this.elements[t.id];
@@ -664,6 +670,39 @@ class DropdownInput {
     }
 }
 
+class CanvasInput {
+    constructor(mark, page, containerRect, mode = "edit", id = null) {
+        this.mark = mark;
+        this.id = id || `canvas-${Date.now()}`;
+        this.element;
+        this.mode = mode;
+        this.type = 'canvas';
+        this.rect = mark.getBoundingClientRect();
+        this.rect = { width: this.rect.width, height: this.rect.height, left: this.rect.left - containerRect.left, top: this.rect.top - containerRect.top };
+        page.elements = page.elements || {};
+        page.elements[this.id] = this;
+        mark.setAttribute('data-id', this.id);
+    }
+
+    prepareData() {
+        if(this.mode === 'edit') {
+            return {
+                type: this.type,
+                rect: this.rect,
+            }
+        }
+    }
+
+    render() {
+        this.mark.innerHTML = '';
+        let canvas = document.createElement('canvas');
+        canvas.width = parseInt(this.mark.style.width);
+        canvas.height = parseInt(this.mark.style.height);
+        canvas.style.border = '1px solid #cbd5e1';
+        this.mark.appendChild(canvas);
+    }
+}
+
 export function exportToPdf(url, pages, callback) {
     fetch(url)
     .then(res => res.arrayBuffer())
@@ -785,10 +824,52 @@ export function exportToPdf(url, pages, callback) {
                         y: page.getHeight() - el.rect.top - dropdownHeight + (dropdownHeight - el.fontSize) / 2,
                         size: el.fontSize,
                     });
+                } else if(el.type === 'canvas') {
+                    if(el.value) {
+                        if(el.value.startsWith('data:image/png;base64,')) {
+                            const base64Data = el.value.replace('data:image/png;base64,', '');
+                            const pngImageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+                            const pngImage = await pdfDoc.embedPng(pngImageBytes);
+                            // const pngDims = pngImage.scale(1);
+                            page.drawImage(pngImage, {
+                                x: el.rect.left,
+                                y: page.getHeight() - el.rect.top - el.rect.height,
+                                width: el.rect.width,
+                                height: el.rect.height,
+                            });
+                        } else if(el.value.startsWith('https://') || el.value.startsWith('http://')) {
+                            const imgBytes = await fetch(el.value).then(res => res.arrayBuffer());
+                            const pngImage = await pdfDoc.embedPng(imgBytes);
+                            // const pngDims = pngImage.scale(1);
+                            page.drawImage(pngImage, {
+                                x: el.rect.left,
+                                y: page.getHeight() - el.rect.top - el.rect.height,
+                                width: el.rect.width,
+                                height: el.rect.height,
+                            });
+                        }
+                    }
                 }
             }
         }
 
         callback(await pdfDoc.save());
     });
+}
+
+export function dataURLToBlob(dataURL) {
+    const parts = dataURL.split(';base64,');
+    const contentType = parts[0].split(':')[1];
+    const byteCharacters = atob(parts[1]);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+    return new Blob(byteArrays, { type: contentType });
 }

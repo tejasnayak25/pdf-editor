@@ -246,8 +246,8 @@ export default function PdfEdit() {
                   <option value="text">Text</option>
                   <option value="radio">Radio</option>
                   <option value="checkbox">Checkbox</option>
-                  {/* <option value="free-hand">Free-hand</option> */}
                   <option value="dropdown">Dropdown</option>
+                  <option value="canvas">Canvas</option>
                 </select>
 
                 <ALargeSmall className='w-5 h-5'/>

@@ -58,8 +58,6 @@ export default function PdfSubmissionView() {
                 .then(data => {
                     setConfig(data);
 
-                    console.log("Fetching submission data for ID:", data);
-
                     if(submissionId) {
                         fetch(`/api/pdfs/${pdfId}/get-submission`, {
                             method: 'POST',
@@ -74,7 +72,6 @@ export default function PdfSubmissionView() {
                         .then(data2 => {
                             if(data2.success) {
                                 let submissionData = data2.submission;
-                                console.log("Fetched submission data:", submissionData);
                                 if(submissionData && submissionData.values) {
                                     valuesRef.current = { ...submissionData.values };
                                     let configCopy = { ...data };

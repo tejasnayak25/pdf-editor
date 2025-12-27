@@ -59,3 +59,4 @@ A: Each input field has its position and dimensions stored relative to the PDF p
 A: When a user reopens a saved draft, we fetch the draft data from the database using the user's email and the Draft ID. We then load the original PDF and overlay the input fields with their saved values onto the PDF viewer. This allows the user to see their previous edits and continue working from where they left off.
 
 **Q: How would you handle security basics (file validation, access control)?**
+A: File validation is performed during the upload process to ensure that only valid PDF files are accepted. This includes checking the file type. Access control is implemented through user authentication and role-based permissions. Only authenticated users can access the application, and specific actions (like uploading or editing PDFs) are restricted based on the user's role (teacher or student).

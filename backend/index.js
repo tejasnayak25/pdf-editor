@@ -67,10 +67,19 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
     let { name, description, accessList, createdBy } = req.body;
     accessList = JSON.parse(accessList || "[]");
     let file = req.file;
-    console.log("Received upload:", { name, description, accessList, file });
 
     if (!file) {
         res.status(400).json({ success: false, message: "No file uploaded" });
+        return;
+    }
+
+    if(file.mimetype !== "application/pdf") {
+        res.status(400).json({ success: false, message: "Invalid file type. Only PDF files are allowed." });
+        return;
+    }
+
+    if(file.size === 0) {
+        res.status(400).json({ success: false, message: "Uploaded file is empty." });
         return;
     }
 

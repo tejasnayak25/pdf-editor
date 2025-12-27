@@ -85,7 +85,6 @@ export default function PdfEdit() {
 
     const handleMouseDown = (e) => {
       if(balloonsRef.current[pageNumber].visible) {
-        console.log(e.target);
         if(e.target.classList.contains("dialog-editor") || e.target.closest(".dialog-editor")) {
           return;
         }

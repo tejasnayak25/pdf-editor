@@ -174,7 +174,7 @@ export default function PdfSubmissionView() {
                     </div>
                     <header className='fixed z-20 top-0 left-0 w-full text-white px-4 py-5 rounded-sm text-lg pointer-events-none flex gap-4 items-center justify-between'>
                         <div className='flex gap-4 items-center'>
-                            <button className='btn btn-ghost btn-square' onClick={() => window.location.href = "/"}>
+                            <button className='btn btn-ghost btn-square' onClick={() => window.location.href = `/pdfs/${pdfId}/submissions`} >
                             <ChevronLeft className='w-7 h-7 pointer-events-auto' />
                             </button> 
                             {pdf.name}

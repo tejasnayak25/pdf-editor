@@ -59,7 +59,7 @@ export default function Login() {
                         </label>
                         <input ref={passwordRef} type="password" placeholder="******" className="input input-bordered w-full bg-slate-200 text-slate-900 autofill:text-slate-900 placeholder:text-slate-500" />
                     </div>
-                    <div className="w-full flex justify-center mt-6">
+                    <div className="w-full flex justify-center items-center flex-col gap-5 mt-6">
                         <button onClick={handleLogin} className="btn btn-primary px-10">Login</button>
                         <a href="/signup" className="btn btn-ghost px-10 mt-5">Don't have an account?</a>
                     </div>

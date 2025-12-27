@@ -14,6 +14,7 @@ export default function CanvasInput({ id, page, type, rect, value, onValueChange
 
         if (value) {
             const img = new Image();
+            img.crossOrigin = "anonymous";
             img.src = value;
             img.onload = () => {
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);

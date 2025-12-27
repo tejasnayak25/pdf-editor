@@ -55,7 +55,7 @@ export default function CanvasInput({ id, page, type, rect, value, onValueChange
     return (
         <canvas
             id={id}
-            className={`absolute border border-slate-300 rounded bg-white item-${type}`}
+            className={`absolute border border-slate-300 rounded bg-white/50 item-${type}`}
             style={{
                 top: rect?.top + 'px',
                 left: rect?.left + 'px',

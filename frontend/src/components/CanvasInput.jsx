@@ -61,7 +61,6 @@ export default function CanvasInput({ id, page, type, rect, value, onValueChange
             isDrawing = false;
 
             const dataUrl = canvas.toDataURL();
-            console.log("Canvas data URL:", dataUrl);
             onValueChange(page, id, dataUrl);
         }
 

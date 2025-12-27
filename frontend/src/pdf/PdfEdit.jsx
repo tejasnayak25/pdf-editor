@@ -225,13 +225,19 @@ export default function PdfEdit() {
 
   return (
     <div className='text-slate-900 flex size-full'>
+      {
+        (!pdf) && (
+          <div className='text-slate-100 bg-slate-950 flex justify-center items-center size-full h-dvh z-30 fixed top-0 left-0'>
+            <Loader2 className="w-12 h-12 animate-spin" />
+          </div>
+        )
+      }
       <div className=' max-h-dvh flex-1 overflow-y-hidden flex justify-center bg-slate-950'>
         {pdf ? (
           <div className='relative h-dvh'>
             <div className=' relative z-10 h-dvh'>
               <Document options={options} file={pdf.file.url} onLoadSuccess={onDocumentLoadSuccess} className="relative z-11">
                 <Page pageNumber={pageNumber} onRenderSuccess={() => {
-                  // Capture stable rect after page renders
                   setTimeout(() => {
                     if(canvasRef.current) {
                       containerRectRef.current = canvasRef.current.getBoundingClientRect();

@@ -20,7 +20,7 @@ This project is a PDF editor that allows users to upload, edit, and manage PDF d
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/pdf-editor.git
+   git clone https://github.com/tejasnayak25/pdf-editor.git
    ```
 2. Navigate to the project directory:
    ```bash

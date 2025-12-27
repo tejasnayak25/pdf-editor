@@ -124,7 +124,7 @@ export default function PdfSubmissionView() {
             const blob = new Blob([pdfBytes], { type: "application/pdf" });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "example.pdf";
+            link.download = `${pdf.name}.pdf`;
             link.click();
         });
     }

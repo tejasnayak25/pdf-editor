@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import { getPdf } from "./utils";
+import { exportToPdf, getPdf } from "./utils";
 import { Document, Page } from "react-pdf";
-import { ChevronLeft, ChevronUp, ChevronDown, Save, History, Loader, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronUp, ChevronDown, Save, History, Loader, Loader2, Printer } from "lucide-react";
 import { options } from "./pdf-viewer-utils";
 import TextInput from "../components/TextInput";
 import RadioInput from "../components/RadioInput";
@@ -216,6 +216,16 @@ export default function PdfView() {
         window.open(`/pdfs/${pdfId}/view?version=${version._id}`, '_self');     
     }
 
+    function exportPdf() {
+        exportToPdf(pdf.file.url, config, (pdfBytes) => {
+            const blob = new Blob([pdfBytes], { type: "application/pdf" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${pdf.name}.pdf`;
+            link.click();
+        });
+    }
+
     return (
         <div className='text-slate-900 flex size-full'>
             {
@@ -261,12 +271,20 @@ export default function PdfView() {
                             </button> 
                             {pdf.name}
                         </div>
-                        {user?.role === "student" && (
-                            <button onClick={() => setNavOpen(!navOpen)} className='btn btn-outline pointer-events-auto flex items-center text-lg px-5 py-4'>
-                            <Save className='w-5 h-5 mr-2'/>
-                            Save
-                            </button>
-                        )}
+                        <div className="flex gap-4 items-center">
+                            {user?.role === "student" && (
+                                <button onClick={exportPdf} className='btn btn-outline pointer-events-auto flex items-center text-lg px-5 py-4'>
+                                <Printer className='w-5 h-5 mr-2'/>
+                                Export PDF
+                                </button>
+                            )}
+                            {user?.role === "student" && (
+                                <button onClick={() => setNavOpen(!navOpen)} className='btn btn-outline pointer-events-auto flex items-center text-lg px-5 py-4'>
+                                <Save className='w-5 h-5 mr-2'/>
+                                Save
+                                </button>
+                            )}
+                        </div>
                         {user?.role === "student" && (
                             <div className={`${navOpen ? 'flex opacity-100' : 'hidden opacity-0'} transition-opacity delay-150 absolute top-16 right-4 flex-col gap-0.5 bg-slate-800 text-slate-900 p-0.5 rounded-md shadow-lg w-52 pointer-events-auto`}>
                                 <button onClick={() => handleSave("draft")} className="btn btn-ghost bg-slate-900 text-white hover:bg-slate-800">Save Draft</button>

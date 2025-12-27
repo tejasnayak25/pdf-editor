@@ -3,6 +3,8 @@
 ## Overview
 This project is a PDF editor that allows users to upload, edit, and manage PDF documents efficiently.
 
+### [View Live](https://pdf-editor-olive.vercel.app/)
+
 ## Features
 - Upload PDF files
 - Add text, radio, checkbox, dropdown and canvas inputs.
@@ -16,6 +18,9 @@ This project is a PDF editor that allows users to upload, edit, and manage PDF d
 - Frontend: React, Vite, Tailwind CSS
 - Backend: Node.js, Express
 - PDF Manipulation: pdf-lib, react-pdf
+- Database: MongoDB
+- Storage: Vercel Blob Storage
+- Deployment: Vercel
 
 ## Installation
 1. Clone the repository:
@@ -50,13 +55,13 @@ This project is a PDF editor that allows users to upload, edit, and manage PDF d
 
 ## Q&A
 **Q: How would you handle persisting edits per user (versioning optional but nice)?**
-A: Each time a user makes edits to a PDF, they can save it as a draft and retrieve it later. Each draft is associated with the user's ID and the PDF ID in the database. When the user submits the final version, it is saved as a completed submission.
+> Each time a user makes edits to a PDF, they can save it as a draft and retrieve it later. Each draft is associated with the user's ID and the PDF ID in the database. When the user submits the final version, it is saved as a completed submission.
 
 **Q: How would you handle exporting a final PDF (flattened)?**
-A: Each input field has its position and dimensions stored relative to the PDF page. When exporting, we use a PDF manipulation library (like pdf-lib) to load the original PDF, iterate over each input field, and draw the corresponding values directly onto the PDF at the specified positions. Finally, we save the modified PDF as a new file for download.
+> Each input field has its position and dimensions stored relative to the PDF page. When exporting, we use a PDF manipulation library (like pdf-lib) to load the original PDF, iterate over each input field, and draw the corresponding values directly onto the PDF at the specified positions. Finally, we save the modified PDF as a new file for download.
 
 **Q: How would you handle reopening a saved draft (not just final export)?**
-A: When a user reopens a saved draft, we fetch the draft data from the database using the user's ID and the Draft ID. We then load the original PDF and overlay the input fields with their saved values onto the PDF viewer. This allows the user to see their previous edits and continue working from where they left off.
+> When a user reopens a saved draft, we fetch the draft data from the database using the user's ID and the Draft ID. We then load the original PDF and overlay the input fields with their saved values onto the PDF viewer. This allows the user to see their previous edits and continue working from where they left off.
 
 **Q: How would you handle security basics (file validation, access control)?**
-A: File validation is performed during the upload process to ensure that only valid PDF files are accepted. This includes checking the file type. Access control is implemented through user authentication and role-based permissions. Only authenticated users can access the application, and specific actions (like uploading or editing PDFs) are restricted based on the user's role (teacher or student).
+> File validation is performed during the upload process to ensure that only valid PDF files are accepted. This includes checking the file type. Access control is implemented through user authentication and role-based permissions. Only authenticated users can access the application, and specific actions (like uploading or editing PDFs) are restricted based on the user's role (teacher or student).

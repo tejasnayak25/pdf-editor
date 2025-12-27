@@ -20,7 +20,7 @@ export default function Home() {
             window.location.href = "/login";
             return;
         } else {
-            fetch(`/api/user/${user.email}`)
+            fetch(`/api/user/${user.uid}`)
                 .then(res => res.json())
                 .then(data => {
                     if(data.success) {
@@ -61,7 +61,7 @@ export default function Home() {
         formdata.append("description", description);
         formdata.append("file", selectedFile);
         formdata.append("accessList", JSON.stringify(accessList));
-        formdata.append("createdBy", user.email);
+        formdata.append("createdBy", user.uid);
 
         fetch("/api/upload", {
             method: "POST",
@@ -92,7 +92,7 @@ export default function Home() {
                 body: JSON.stringify({
                     id: pdfId,
                     path: path,
-                    email: user.email
+                    email: user.uid
                 })
             })
             .then(res => res.json())

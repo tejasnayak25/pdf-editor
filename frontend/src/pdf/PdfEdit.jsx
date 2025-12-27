@@ -11,7 +11,7 @@ export default function PdfEdit() {
     const raw = localStorage.getItem('user');
     return raw ? JSON.parse(raw) : null;
   });
-  const userEmail = user?.email;
+  const userUid = user?.uid;
   const [ config, setConfig ] = useState(null);
 
   const [ pdf, setPdf ] = useState(null);
@@ -22,18 +22,18 @@ export default function PdfEdit() {
   const containerRectRef = useRef(null);
 
   useEffect(() => {
-    if(!userEmail) {
+    if(!userUid) {
       window.location.href = '/login';
       return;
     }
-    if(pdfId && userEmail)
-      getPdf(pdfId, 'edit', userEmail)
+    if(pdfId && userUid)
+      getPdf(pdfId, 'edit', userUid)
         .then(fetchedPdf => setPdf(fetchedPdf))
         .catch(err => {
           console.error("Error fetching PDF:", err);
           setPdf(null);
         });
-  }, [pdfId, userEmail]);
+  }, [pdfId, userUid]);
 
   useEffect(() => {
         if(!pdf) return;
@@ -180,7 +180,7 @@ export default function PdfEdit() {
       let pdfData = {
         pdf_id: pdfId,
         pages: {},
-        creator: userEmail,
+        creator: userUid,
       };
       for(const pageNum in pagesRef.current) {
         const page = pagesRef.current[pageNum];

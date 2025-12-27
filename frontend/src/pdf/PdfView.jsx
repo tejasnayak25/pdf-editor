@@ -16,7 +16,7 @@ export default function PdfView() {
         const raw = localStorage.getItem('user');
         return raw ? JSON.parse(raw) : null;
     });
-    const userEmail = user?.email;
+    const userUid = user?.uid;
     const [ pdf, setPdf ] = useState(null);
     const [ numPages, setNumPages ] = useState(null);
     const [ pageNumber, setPageNumber ] = useState(0);
@@ -36,13 +36,13 @@ export default function PdfView() {
     }
 
     function fetchVersions() {
-        if(!pdfId || !userEmail) return;
+        if(!pdfId || !userUid) return;
         fetch(`/api/pdfs/${pdfId}/get-user-drafts-submissions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userEmail }),
+            body: JSON.stringify({ userUid }),
         })
         .then(res => res.json())
         .then(data => {
@@ -60,7 +60,7 @@ export default function PdfView() {
     }
 
     useEffect(() => {
-        if(!userEmail) {
+        if(!userUid) {
           window.location.href = '/login';
           return;
         }
@@ -68,8 +68,8 @@ export default function PdfView() {
             window.location.href = '/';
             return;
         }
-        if(pdfId && userEmail)
-          getPdf(pdfId, 'view', userEmail)
+        if(pdfId && userUid)
+          getPdf(pdfId, 'view', userUid)
             .then(fetchedPdf => {
                 setPdf(fetchedPdf);
                 fetchVersions();
@@ -78,7 +78,7 @@ export default function PdfView() {
               console.error("Error fetching PDF:", err);
               setPdf(null);
             });
-    }, [pdfId, userEmail]);
+    }, [pdfId, userUid]);
 
     useEffect(() => {
         if(!pdf) return;
@@ -116,7 +116,7 @@ export default function PdfView() {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                userEmail: userEmail,
+                                userUid: userUid,
                                 versionId: versionId,
                             }),
                         }).then(res => res.json())
@@ -200,7 +200,7 @@ export default function PdfView() {
             }
         });
 
-        formdata.append('userEmail', userEmail);
+        formdata.append('userUid', userUid);
         formdata.append('values', JSON.stringify(values));
 
         fetch(`/api/pdfs/${pdfId}/save-${mode}`, {

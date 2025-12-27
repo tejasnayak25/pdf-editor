@@ -1,13 +1,13 @@
 import { PDFDocument, rgb } from "pdf-lib";
 
-export const getPdf = (pdfId, mode, email) => {
+export const getPdf = (pdfId, mode, uid) => {
     return new Promise((resolve, reject) => {
         fetch(`/api/pdfs/${pdfId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ mode, email })
+            body: JSON.stringify({ mode, uid })
         })
         .then(response => response.json())
         .then(data => resolve(data.pdf))

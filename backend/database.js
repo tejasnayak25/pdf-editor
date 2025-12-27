@@ -59,11 +59,11 @@ class Database {
         return this.userCollection.findOne({ email: email, password: password, role: role });
     }
 
-    async getUserPdfs(email) {
+    async getUserPdfs(uid) {
         const results = await this.pdfCollection.find({
             $or: [
-                { createdBy: email },
-                { accessList: email }
+                { createdBy: uid },
+                { accessList: uid }
             ]
         }).toArray();
 
@@ -92,21 +92,21 @@ class Database {
         );
     }
 
-    savePdfDraft(pdfId, userEmail, values) {
+    savePdfDraft(pdfId, uid, values) {
         return this.draftsCollection.insertOne({
             pdfId: pdfId,
             values: values,
             createdAt: new Date(),
-            createdBy: userEmail
+            createdBy: uid
         });
     }
 
-    savePdfSubmission(pdfId, userEmail, values) {
+    savePdfSubmission(pdfId, uid, values) {
         return this.submissionsCollection.insertOne({
             pdfId: pdfId,
             values: values,
             createdAt: new Date(),
-            createdBy: userEmail
+            createdBy: uid
         });
     }
 
@@ -114,20 +114,20 @@ class Database {
         return this.submissionsCollection.find({ pdfId: pdfId }).toArray();
     }
 
-    getPdfUserDrafts(pdfId, userEmail) {
-        return this.draftsCollection.find({ pdfId: pdfId, createdBy: userEmail }).toArray();
+    getPdfUserDrafts(pdfId, uid) {
+        return this.draftsCollection.find({ pdfId: pdfId, createdBy: uid }).toArray();
     }
     
-    getPdfUserSubmissions(pdfId, userEmail) {
-        return this.submissionsCollection.find({ pdfId: pdfId, createdBy: userEmail }).toArray();
+    getPdfUserSubmissions(pdfId, uid) {
+        return this.submissionsCollection.find({ pdfId: pdfId, createdBy: uid }).toArray();
     }
 
-    getPdfVersionById(versionId, userEmail) {
+    getPdfVersionById(versionId, uid) {
         let objectId = new ObjectId(versionId);
-        return this.draftsCollection.findOne({ _id: objectId, createdBy: userEmail })
+        return this.draftsCollection.findOne({ _id: objectId, createdBy: uid })
             .then(draft => {
                 if (draft) return draft;
-                return this.submissionsCollection.findOne({ _id: objectId, createdBy: userEmail });
+                return this.submissionsCollection.findOne({ _id: objectId, createdBy: uid });
             });
     }
 

@@ -52,7 +52,7 @@ app.post("/api/login", async (req, res) => {
         await database.connect();
         let user = await database.findUser(email, password, role);
         if (user) {
-            res.json({ success: true, user: { email: user.email, role: user.role } });
+            res.json({ success: true, user: { uid: user._id, email: user.email, role: user.role } });
         } else {
             res.json({ success: false, message: "Invalid credentials" });
         }
@@ -116,9 +116,9 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
 });
 
 app.post("/api/delete-pdf", async (req, res) => {
-    let { id, path, email } = req.body;
+    let { id, path, createdBy } = req.body;
 
-    if(!email) {
+    if(!createdBy) {
         res.status(401).json({ success: false, message: "Unauthorized" });
         return;
     }
@@ -137,7 +137,7 @@ app.post("/api/delete-pdf", async (req, res) => {
             return;
         }
 
-        if(pdf.createdBy !== email) {
+        if(pdf.createdBy !== createdBy) {
             res.status(403).json({ success: false, message: "Forbidden" });
             return;
         }
@@ -173,14 +173,14 @@ app.post("/api/delete-pdf", async (req, res) => {
 
 app.post("/api/pdfs/:pdfId", async (req, res) => {
     let pdfId = req.params.pdfId;
-    let { mode, email } = req.body;
+    let { mode, uid } = req.body;
     try {
         await database.connect();
         let pdf = await database.getPdfById(pdfId);
         if (pdf) {
-            if (mode === 'edit' && pdf.createdBy === email) {
+            if (mode === 'edit' && pdf.createdBy === uid) {
                 res.json({ success: true, pdf });
-            } else if(mode === 'view' && (pdf.createdBy === email || (pdf.accessList && pdf.accessList.includes(email)))) {
+            } else if(mode === 'view' && (pdf.createdBy === uid || (pdf.accessList && pdf.accessList.includes(uid)))) {
                 res.json({ success: true, pdf });
             } else {
                 res.status(403).json({ success: false, message: "Access denied" });
@@ -230,7 +230,7 @@ app.post("/api/save-pdf-config", async (req, res) => {
 
 app.post("/api/pdfs/:pdfId/save-draft", upload.any(), async (req, res) => {
     let pdfId = req.params.pdfId;
-    let { userEmail, values } = req.body;
+    let { userUid, values } = req.body;
 
     if (typeof values === "string") {
       values = JSON.parse(values);
@@ -244,7 +244,7 @@ app.post("/api/pdfs/:pdfId/save-draft", upload.any(), async (req, res) => {
         return res.status(404).json({ success: false, message: "PDF not found" });
       }
 
-      if (!pdf.accessList?.includes(userEmail)) {
+      if (!pdf.accessList?.includes(userUid)) {
         return res.status(403).json({ success: false, message: "Forbidden" });
       }
 
@@ -261,14 +261,14 @@ app.post("/api/pdfs/:pdfId/save-draft", upload.any(), async (req, res) => {
                 if (env === "development") {
                     values[key] = file.path;
                 } else {
-                    let uploadData = await storage.uploadFile(`pdf-files/${pdfId}/${userEmail}/${Date.now()}/${file.originalname}`, file);
+                    let uploadData = await storage.uploadFile(`pdf-files/${pdfId}/${userUid}/${Date.now()}/${file.originalname}`, file);
                     values[key] = uploadData.url;
                 }
             }
         }
       }
 
-      const result = await database.savePdfDraft(pdfId, userEmail, values);
+      const result = await database.savePdfDraft(pdfId, userUid, values);
 
       res.json({
         success: true,
@@ -283,7 +283,7 @@ app.post("/api/pdfs/:pdfId/save-draft", upload.any(), async (req, res) => {
 
 app.post("/api/pdfs/:pdfId/save-submission", upload.any(), async (req, res) => {
     let pdfId = req.params.pdfId;
-    let { userEmail, values } = req.body;
+    let { userUid, values } = req.body;
 
     if (typeof values === "string") {
       values = JSON.parse(values);
@@ -297,7 +297,7 @@ app.post("/api/pdfs/:pdfId/save-submission", upload.any(), async (req, res) => {
         return res.status(404).json({ success: false, message: "PDF not found" });
       }
 
-      if (!pdf.accessList?.includes(userEmail)) {
+      if (!pdf.accessList?.includes(userUid)) {
         return res.status(403).json({ success: false, message: "Forbidden" });
       }
 
@@ -314,14 +314,14 @@ app.post("/api/pdfs/:pdfId/save-submission", upload.any(), async (req, res) => {
                 if (env === "development") {
                     values[key] = file.path;
                 } else {
-                    let uploadData = await storage.uploadFile(`pdf-files/${pdfId}/${userEmail}/${Date.now()}/${file.originalname}`, file);
+                    let uploadData = await storage.uploadFile(`pdf-files/${pdfId}/${userUid}/${Date.now()}/${file.originalname}`, file);
                     values[key] = uploadData.url;
                 }
             }
         }
       }
 
-      const result = await database.savePdfSubmission(pdfId, userEmail, values);
+      const result = await database.savePdfSubmission(pdfId, userUid, values);
 
       res.json({
         success: true,
@@ -359,7 +359,7 @@ app.post("/api/pdfs/:pdfId/get-submissions", async (req, res) => {
 
 app.post("/api/pdfs/:pdfId/get-user-drafts-submissions", async (req, res) => {
     let pdfId = req.params.pdfId;
-    let { userEmail } = req.body;
+    let { userUid } = req.body;
     try {
         await database.connect();
         let pdf = await database.getPdfById(pdfId);
@@ -367,12 +367,12 @@ app.post("/api/pdfs/:pdfId/get-user-drafts-submissions", async (req, res) => {
             res.status(404).json({ success: false, message: "PDF not found" });
             return;
         }
-        if (!(pdf.accessList && pdf.accessList.includes(userEmail))) {
+        if (!(pdf.accessList && pdf.accessList.includes(userUid))) {
             res.status(403).json({ success: false, message: "Forbidden" });
             return;
         }
-        let drafts = await database.getPdfUserDrafts(pdfId, userEmail);
-        let submissions = await database.getPdfUserSubmissions(pdfId, userEmail);
+        let drafts = await database.getPdfUserDrafts(pdfId, userUid);
+        let submissions = await database.getPdfUserSubmissions(pdfId, userUid);
         res.json({ success: true, drafts, submissions });
     } catch (error) {
         console.error("Error connecting to database:", error);
@@ -383,7 +383,7 @@ app.post("/api/pdfs/:pdfId/get-user-drafts-submissions", async (req, res) => {
 
 app.post("/api/pdfs/:pdfId/get-version", async (req, res) => {
     let pdfId = req.params.pdfId;
-    let { userEmail, versionId } = req.body;
+    let { userUid, versionId } = req.body;
     try {
         await database.connect();
         
@@ -392,11 +392,11 @@ app.post("/api/pdfs/:pdfId/get-version", async (req, res) => {
             res.status(404).json({ success: false, message: "PDF not found" });
             return;
         }
-        if(!(pdf.accessList && pdf.accessList.includes(userEmail))) {
+        if(!(pdf.accessList && pdf.accessList.includes(userUid))) {
             res.status(403).json({ success: false, message: "Forbidden" });
             return;
         }
-        let version = await database.getPdfVersionById(versionId, userEmail);
+        let version = await database.getPdfVersionById(versionId, userUid);
         if(!version) {
             res.status(404).json({ success: false, message: "Version not found" });
             return;
@@ -410,7 +410,7 @@ app.post("/api/pdfs/:pdfId/get-version", async (req, res) => {
 
 app.post("/api/pdfs/:pdfId/get-submission", async (req, res) => {
     let pdfId = req.params.pdfId;
-    let { userEmail, submissionId } = req.body;
+    let { userUid, submissionId } = req.body;
     try {
         await database.connect();
         
@@ -419,7 +419,7 @@ app.post("/api/pdfs/:pdfId/get-submission", async (req, res) => {
             res.status(404).json({ success: false, message: "PDF not found" });
             return;
         }
-        if(!(pdf.createdBy === userEmail)) {
+        if(!(pdf.createdBy === userUid)) {
             res.status(403).json({ success: false, message: "Forbidden" });
             return;
         }
@@ -435,14 +435,14 @@ app.post("/api/pdfs/:pdfId/get-submission", async (req, res) => {
     }
 });
 
-app.get("/api/user/:email", async (req, res) => {
-    let email = req.params.email;
+app.get("/api/user/:uid", async (req, res) => {
+    let uid = req.params.uid;
     try {
         await database.connect();
         
-        let userPdfs = await database.getUserPdfs(email);
+        let userPdfs = await database.getUserPdfs(uid);
         if (userPdfs) {
-            res.json({ success: true, user: { email, pdfs: userPdfs } });
+            res.json({ success: true, user: { uid, pdfs: userPdfs } });
         } else {
             res.json({ success: false, message: "User not found" });
         }

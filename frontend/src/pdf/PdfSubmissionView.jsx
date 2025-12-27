@@ -16,7 +16,7 @@ export default function PdfSubmissionView() {
         const raw = localStorage.getItem('user');
         return raw ? JSON.parse(raw) : null;
     });
-    const userEmail = user?.email;
+    const userUid = user?.uid;
     const [ pdf, setPdf ] = useState(null);
     const [ numPages, setNumPages ] = useState(null);
     const [ pageNumber, setPageNumber ] = useState(0);
@@ -31,7 +31,7 @@ export default function PdfSubmissionView() {
     }
 
     useEffect(() => {
-        if(!userEmail) {
+        if(!userUid) {
           window.location.href = '/login';
           return;
         }
@@ -39,8 +39,8 @@ export default function PdfSubmissionView() {
             window.location.href = '/';
             return;
         }
-        if(pdfId && userEmail)
-          getPdf(pdfId, 'view', userEmail)
+        if(pdfId && userUid)
+          getPdf(pdfId, 'view', userUid)
             .then(fetchedPdf => {
                 setPdf(fetchedPdf);
             })
@@ -48,7 +48,7 @@ export default function PdfSubmissionView() {
               console.error("Error fetching PDF:", err);
               setPdf(null);
             });
-    }, [pdfId, userEmail]);
+    }, [pdfId, userUid]);
 
     useEffect(() => {
         if(!pdf) return;
@@ -65,7 +65,7 @@ export default function PdfSubmissionView() {
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
-                                userEmail: userEmail,
+                                userUid: userUid,
                                 submissionId: submissionId,
                             }),
                         }).then(res => res.json())

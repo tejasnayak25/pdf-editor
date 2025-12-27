@@ -12,7 +12,7 @@ export default function PdfSubmissions() {
     });
     const [ submissions, setSubmissions ] = useState([]);
 
-    const userEmail = user?.email;
+    const userUid = user?.uid;
 
     function fetchSubmissions() {
         fetch(`/api/pdfs/${pdfId}/get-submissions`, {
@@ -20,7 +20,7 @@ export default function PdfSubmissions() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ creator: userEmail }),
+            body: JSON.stringify({ creator: userUid }),
         }).then(res => res.json())
         .then(data => {
             setSubmissions(data.submissions);
@@ -31,7 +31,7 @@ export default function PdfSubmissions() {
     }
 
     useEffect(() => {
-        if(!userEmail) {
+        if(!userUid) {
           window.location.href = '/login';
           return;
         }
@@ -39,8 +39,8 @@ export default function PdfSubmissions() {
             window.location.href = '/';
             return;
         }
-        if(pdfId && userEmail)
-          getPdf(pdfId, 'view', userEmail)
+        if(pdfId && userUid)
+          getPdf(pdfId, 'view', userUid)
             .then(fetchedPdf => {
                 setPdf(fetchedPdf);
                 fetchSubmissions();
@@ -49,7 +49,7 @@ export default function PdfSubmissions() {
               console.error("Error fetching PDF:", err);
               setPdf(null);
             });
-    }, [pdfId, userEmail]);
+    }, [pdfId, userUid]);
     return (
         <div className='text-slate-900 flex justify-center items-center size-full'>
             {

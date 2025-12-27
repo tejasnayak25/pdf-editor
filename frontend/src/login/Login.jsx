@@ -61,7 +61,7 @@ export default function Login() {
                     </div>
                     <div className="w-full flex justify-center items-center flex-col gap-5 mt-6">
                         <button onClick={handleLogin} className="btn btn-primary px-10">Login</button>
-                        <a href="/signup" className="btn btn-ghost px-10 mt-5">Don't have an account?</a>
+                        <a href="/signup" className="link px-10">Don't have an account?</a>
                     </div>
                 </div>
             </div>

@@ -60,7 +60,7 @@ export default function Signup() {
                     </div>
                     <div className="w-full flex justify-center items-center flex-col gap-5 mt-6">
                         <button onClick={handleSignup} className="btn btn-primary px-10">Signup</button>
-                        <a href="/login" className="btn btn-ghost px-10 mt-5">Already have an account?</a>
+                        <a href="/login" className="link px-10">Already have an account?</a>
                     </div>
                 </div>
             </div>

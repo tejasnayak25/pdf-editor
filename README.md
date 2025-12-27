@@ -3,7 +3,7 @@
 ## Overview
 This project is a PDF editor that allows users to upload, edit, and manage PDF documents efficiently.
 
-### [View Live](https://pdf-editor-olive.vercel.app/)
+### [View Live](https://pdf-editor-live.vercel.app/)
 
 ## Features
 - Upload PDF files

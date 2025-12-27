@@ -1,6 +1,12 @@
-import { useRef } from "react"
+import { useEffect, useRef } from "react"
 
 export default function Signup() {
+    useEffect(() => {
+        if(localStorage.getItem("user")) {
+            window.location.href = "/";
+        }
+    }, []);
+
     let emailRef = useRef();
     let passwordRef = useRef();
     let roleRef = useRef("select");
